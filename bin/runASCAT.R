@@ -18,7 +18,12 @@ if(length(args)==0){
   purity = as.numeric(args[10])
   ploidy = as.numeric(args[11])
   refchrs = args[12]
-  refCN = as.numeric(args[13])
+ 
+  refCN = ifelse(args[13]=="NA",NA,as.numeric(args[13])) 
+  if(is.na(refchrs)||refchrs=="NA") {
+  	refchrs = NA
+	}
+
 }
 
 ## checkpointing: if the RData file exists, only rerun the last step of ASCAT

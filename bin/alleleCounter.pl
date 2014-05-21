@@ -126,7 +126,7 @@ sub get_full_loci_profile {
     ($chr, $pos) = split /\s/, $line;
     $g_pu_data = Sanger::CGP::Ascat::Genotype::PileupData->new($chr, $pos);
     $region = $chr.':'.$pos.'-'.$pos;
-    $sam->fast_pileup($region, \&allele_counts);
+    $sam->fast_pileup($region, \&allele_counts_callback);
     print $fh $g_pu_data->chr or croak "Failed to write line: $OS_ERROR\n";
     print $fh TAB,$g_pu_data->pos or croak "Failed to write line: $OS_ERROR\n";
     print $fh TAB,$g_pu_data->residue_count('A') or croak "Failed to write line: $OS_ERROR\n";
@@ -140,18 +140,24 @@ sub get_full_loci_profile {
   return 1;
 }
 
-sub allele_counts {
+sub allele_counts_callback {
   my ($seqid, $pos, $pu) = @_;
   return if($pos != $g_pu_data->pos);
   foreach my $p (@{$pu}) {
     next if($p->indel || $p->is_refskip);
     my $a = $p->alignment;
-    if($g_pu_data->readgrp) {
-      next if($a->get_tag_values('RG') != $g_pu_data->readgrp);
-    }
-    next if(!$a->proper_pair);
-    next if($a->unmapped || $a->munmapped);
-    next if($a->qual < $g_pb_qual);
+    my $flagValue = $a->flag;
+    
+    next if(($flagValue & 4)); #Unmapped read
+    next if(($flagValue & 8)); #Mate unmapped read
+    next if(!($flagValue & 2)); #Not a proper pair
+    next if(($flagValue & 1024)); #PCR/Optical duplicate
+    next if(($flagValue & 256)); #Not primary alignment
+    next if(($flagValue & 512)); #Fails vendor checks
+    next if(($flagValue & 2048)); #Supp. alignment
+    next if($a->qual < $g_pb_qual); # check mapping quality
+    
+    # NB, we are using the same cutoff for mapping quality and base quality checks.  
 
     if($g_pb_qual) {
       my $fa = Bio::DB::Bam::AlignWrapper->new($a, $g_sam);
@@ -185,7 +191,7 @@ const my $BIT_ALLELE_A => 2;
 const my $BIT_ALLELE_B => 4;
 
 sub new {
-  my ($class, $chr, $pos, $allA, $allB, $rg) = @_;
+  my ($class, $chr, $pos, $allA, $allB) = @_;
   my $self =  { 'chr' => $chr,
                 'pos' => $pos,
                 'allele_A' => $allA,
@@ -193,7 +199,6 @@ sub new {
                 'count_A' => 0,
                 'count_B' => 0,
                 'depth' => 0,
-                'readgroup_id' => $rg,
                 'A' => 0,
                 'C' => 0,
                 'G' => 0,
@@ -214,10 +219,6 @@ sub pos {
 sub residue_count {
   my ($self, $residue) = @_;
   return $self->{uc $residue};
-}
-
-sub readgrp {
-  return shift->{'readgroup_id'};
 }
 
 sub allele_A {

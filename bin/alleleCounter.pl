@@ -101,7 +101,7 @@ sub get_full_snp6_profile {
     ($chr, $pos, undef, undef, $allA, $allB) = split /\s/, $line;
     $g_pu_data = Sanger::CGP::Ascat::Genotype::PileupData->new($chr, $pos, $allA, $allB);
     $region = $chr.':'.$pos.'-'.$pos;
-    $sam->fast_pileup($region, \&allele_counts);
+    $sam->fast_pileup($region, \&allele_counts_callback);
     print $fh $g_pu_data->chr,TAB,$g_pu_data->pos,TAB,$g_pu_data->count_A,TAB,$g_pu_data->count_B,TAB,$g_pu_data->depth,NL or croak "Failed to write line: $OS_ERROR\n";
   }
   close $SNP6;

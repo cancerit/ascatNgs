@@ -107,6 +107,8 @@ if(length(dir(pattern=rdat_out))==0) {
       Germline_LogR[SNPpos[,1]=="X",1] = Germline_LogR[SNPpos[,1]=="X",1]-1
     }
     Tumor_LogR[,1] = Tumor_LogR[,1] - median(Tumor_LogR[,1],na.rm=T)
+    # set regions with 0 reads in tumor and normal to a LogR of 0.
+    Tumor_LogR[is.na(Tumor_LogR[,1]),1] = 0
 
     # limit the number of digits:
     Tumor_LogR = round(Tumor_LogR,4)

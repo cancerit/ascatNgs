@@ -98,6 +98,11 @@ sub setup {
   
   pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
   pod2usage(-verbose => 2) if(defined $opts{'m'});
+  
+  if($opts{'v'}){
+    print Sanger::CGP::Ascat->VERSION."\n";
+    exit;
+  }
 
   # then check for no args:
   my $defined;

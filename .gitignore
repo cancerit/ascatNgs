@@ -1,1 +1,10 @@
-licence_head.txt
+/perl/Makefile
+/perl/blib
+/perl/docs
+/perl/pm_to_blib
+/perl/MANIFEST.bak
+/install_tmp
+/setup.log
+/LICENCE.TXT
+/README.TXT
+/licence_head.txt

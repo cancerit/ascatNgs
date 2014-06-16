@@ -48,7 +48,7 @@ use PCAP::Cli;
 const my @VALID_PROCESS => qw(allele_count ascat);
 my %index_max = ( 'allele_count'   => 2,
                   'ascat' => 1,);
-const my @VALID_GENDERS => qw(XX XY);
+const my @VALID_GENDERS => qw(XX XY L);
 
 {
   my $options = setup();
@@ -95,6 +95,7 @@ sub setup {
               'sp|snp_pos=s' => \$opts{'snp_pos'},
               'sg|snp_gc=s' => \$opts{'snp_gc'},
               'g|gender=s' => \$opts{'gender'},
+              'l|locus=s' => \$opts{'locus'},
   ) or pod2usage(2);
 
   pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
@@ -123,6 +124,9 @@ sub setup {
 
   if(defined $opts{'gender'}){
     pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
+    if($opts{'gender'} eq 'L') {
+      $opts{'gender'} = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
+    }
   } else {
     pod2usage(-message => 'gender not set', -verbose => 1);
   }
@@ -131,17 +135,9 @@ sub setup {
   if(exists $opts{'process'}) {
     PCAP::Cli::valid_process('process', $opts{'process'}, \@VALID_PROCESS);
     if(exists $opts{'index'}) {
-      my @valid_seqs = Sanger::CGP::Ascat::Implement::valid_seqs(\%opts);
-      my $refs = scalar @valid_seqs;
-
       my $max = $index_max{$opts{'process'}};
-      $max = $refs if($max == -1);
-
-      die "ERROR: based on reference and exclude option index must be between 1 and $refs\n" if($opts{'index'} < 1 || $opts{'index'} > $max);
       PCAP::Cli::opt_requires_opts('index', \%opts, ['process']);
-
       die "No max has been defined for this process type\n" if($max == 0);
-
       PCAP::Cli::valid_index_by_factor('index', $opts{'index'}, $max, 1);
     }
   }
@@ -150,7 +146,6 @@ sub setup {
   }
 
   $opts{'threads'} = 1 unless(defined $opts{'threads'});
-  $opts{'seqtype'} = 'WGS' unless(defined $opts{'seqtype'});
 
   my $tmpdir = File::Spec->catdir($opts{'outdir'}, 'tmpAscat');
   make_path($tmpdir) unless(-d $tmpdir);
@@ -179,26 +174,29 @@ ascat.pl [options]
 
   Required parameters
 
-    -outdir     -o    Folder to output result to.
-    -tumour     -t    Tumour BAM file
-    -normal     -n    Normal BAM file
-    -snp_loci   -s    Snp locus file
-    -snp_pos    -sp   Snp position file
-    -snp_gc     -sg   Snp GC correction file
-    -gender     -g    Sample gender (XX or XY)
+    -outdir       -o    Folder to output result to.
+    -tumour       -t    Tumour BAM file
+    -normal       -n    Normal BAM file
+    -snp_loci     -s    Snp locus file
+    -snp_pos      -sp   Snp position file
+    -snp_gc       -sg   Snp GC correction file
+    -gender       -g    Sample gender (XX, XY, L)
+                          When 'L' define '-l'
 
   Targeted processing (further detail under OPTIONS):
-    -process    -p    Only process this step then exit, optionally set -index
-    -index      -i    Optionally restrict '-p' to single job
+    -process      -p    Only process this step then exit, optionally set -index
+    -index        -i    Optionally restrict '-p' to single job
 
   Optional parameters
     -minbasequal  -q    Minimum base quality required before allele is used.
     -cpus         -c    Number of cores to use. [1]
                         - recommend max 2 during 'input' process.
+    -locus        -l    Attempt to determine gender using a male specific locus.
+                          e.g. Y:2654896-2655740 (GRCh37)
 
 
   Other
-    -help       -h    Brief help message
-    -man        -m    Full documentation.
-    -version    -v    Ascat version number
+    -help         -h    Brief help message
+    -man          -m    Full documentation.
+    -version      -v    Ascat version number
 

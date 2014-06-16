@@ -1,21 +1,21 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd. 
-#  
-# Author: CancerIT <cgpit@sanger.ac.uk> 
-#  
-# This file is part of AscatNGS. 
-#  
-# AscatNGS is free software: you can redistribute it and/or modify it under 
-# the terms of the GNU Affero General Public License as published by the Free 
-# Software Foundation; either version 3 of the License, or (at your option) any 
-# later version. 
-#  
-# This program is distributed in the hope that it will be useful, but WITHOUT 
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more 
-# details. 
-#  
-# You should have received a copy of the GNU Affero General Public License 
+# Copyright (c) 2014 Genome Research Ltd.
+#
+# Author: CancerIT <cgpit@sanger.ac.uk>
+#
+# This file is part of AscatNGS.
+#
+# AscatNGS is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
@@ -42,18 +42,22 @@ use Sanger::CGP::Ascat;
 use PCAP::Threaded;
 use PCAP::Bam;
 
+const my $COUNT_READS => q{%s view -c %s %s};
+
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s ';
 
 const my @ASCAT_RESULT_FILES => qw(aberrationreliability%s.png ASCATprofile%s.png ASPCF%s.png Germline%s.png rawprofile%s.png sunrise%s.png Tumor%s.png CopyNumberCaveman%s.csv CopyNumber%s.txt SampleStatistics%s.csv);
+
+const my $GENDER_MIN => 5;
 
 sub allele_count {
   my ($index, $options) = @_;
   return 1 if(exists $options->{'index'} && $index != $options->{'index'});
   my $tmp = $options->{'tmp'};
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), $index);
-  
+
   my $ac_out = File::Spec->catdir($tmp, 'allele_count');
-  make_path($ac_out) unless(-e $ac_out);  
+  make_path($ac_out) unless(-e $ac_out);
 
   my @inputs = ($options->{'tumour'}, $options->{'normal'});
   my $iter = 1;
@@ -62,9 +66,9 @@ sub allele_count {
 
     my $sname = sanitised_sample_from_bam($input);
     my $alleleCountOut = File::Spec->catfile($ac_out,$sname .'.allct');
-    
+
     my $allc_exe = _which('alleleCounter.pl');
-    my $allc_lib = dirname($allc_exe);    
+    my $allc_lib = dirname($allc_exe);
 
     my $command = "$^X ";
     $command .= $allc_exe;
@@ -80,10 +84,10 @@ sub allele_count {
 
 sub ascat {
   my $options = shift;
-  
+
   my $tmp = $options->{'tmp'};
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
-  
+
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
   my $norm_name = sanitised_sample_from_bam($options->{'normal'});
 
@@ -91,13 +95,13 @@ sub ascat {
   make_path($ascat_out) unless(-e $ascat_out);
 
   my $rdata = File::Spec->catfile($ascat_out,$tum_name.'.Rdata');
-  
+
   my $tumcountfile = $tum_name . '.count';
   my $normcountfile = $norm_name . '.count';
 
   my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
   my $normcount = File::Spec->catfile($ascat_out,$normcountfile);
-  
+
   unlink $tumcount if -l $tumcount;
   unlink $normcount if -l $normcount;
 
@@ -108,10 +112,10 @@ sub ascat {
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $lnnc, 0);
 
   my $command = _which('Rscript');
-  
+
   my $mod_path = dirname(abs_path($0)).'/../share';
   $mod_path = module_dir('Sanger::CGP::Ascat') unless(-e File::Spec->catdir($mod_path, 'ascat'));
-  
+
   my $ascat_path = File::Spec->catdir($mod_path, 'ascat');
   my $ascat_exe = File::Spec->catfile($ascat_path,'runASCAT.R');
 
@@ -127,7 +131,7 @@ sub ascat {
   $command .= ' '.$rdata;
 
   my $original_working_dir = getcwd;
-  
+
   chdir($ascat_out);
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, 0);
@@ -145,7 +149,7 @@ sub finalise {
   my $tmp = $options->{'tmp'};
 
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
-  
+
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   foreach my $f(@ASCAT_RESULT_FILES){
@@ -154,7 +158,7 @@ sub finalise {
     my $to = File::Spec->catfile($options->{'outdir'},$file);
     move $from,$to;
   }
-  
+
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 }
 
@@ -194,6 +198,28 @@ sub _which {
   my $path = File::Spec->catfile($l_bin, $prog);
   $path = which($prog) unless(-e $path);
   return $path;
+}
+
+sub determine_gender {
+  my $options = shift;
+  my $gender = 'XX';
+  my $samtools = _which('samtools');
+  my $command = sprintf $COUNT_READS, $samtools, $options->{'tumour'}, $options->{'locus'};
+  my $tumour_count = `$command`;
+  chomp $tumour_count;
+  $command = sprintf $COUNT_READS, $samtools, $options->{'normal'}, $options->{'locus'};
+  my $normal_count = `$command`;
+  chomp $normal_count;
+  if($normal_count > $GENDER_MIN && $tumour_count > $GENDER_MIN) {
+    $gender = 'XY'; # male
+  }
+  elsif($normal_count <= $GENDER_MIN && $tumour_count <= $GENDER_MIN) {
+    $gender = 'XX'; # female
+  }
+  else {
+    die "Gender guess inconclusive, tum depth: $tumour_count - norm depth: $normal_count\n";
+  }
+  return $gender;
 }
 
 1;

@@ -114,7 +114,7 @@ sub ascat {
   my $command = _which('Rscript');
 
   my $mod_path = dirname(abs_path($0)).'/../share';
-  $mod_path = module_dir('Sanger::CGP::Ascat') unless(-e File::Spec->catdir($mod_path, 'ascat'));
+  $mod_path = module_dir('Sanger::CGP::Ascat::Implement') unless(-e File::Spec->catdir($mod_path, 'ascat'));
 
   my $ascat_path = File::Spec->catdir($mod_path, 'ascat');
   my $ascat_exe = File::Spec->catfile($ascat_path,'runASCAT.R');

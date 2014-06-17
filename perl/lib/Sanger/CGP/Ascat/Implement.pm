@@ -111,7 +111,7 @@ sub ascat {
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $lntc, 0);
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $lnnc, 0);
 
-  my $command = _which('Rscript');
+  my $command = "cd $ascat_out; "._which('Rscript');
 
   my $mod_path = dirname(abs_path($0)).'/../share';
   $mod_path = module_dir('Sanger::CGP::Ascat::Implement') unless(-e File::Spec->catdir($mod_path, 'ascat'));
@@ -130,13 +130,7 @@ sub ascat {
   $command .= ' '.$options->{'gender'};
   $command .= ' '.$rdata;
 
-  my $original_working_dir = getcwd;
-
-  chdir($ascat_out);
-
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, 0);
-
-  chdir($original_working_dir) || die $!;
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 

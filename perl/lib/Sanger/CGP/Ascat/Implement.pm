@@ -46,7 +46,17 @@ const my $COUNT_READS => q{%s view -c %s %s};
 
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s ';
 
-const my @ASCAT_RESULT_FILES => qw(aberrationreliability%s.png ASCATprofile%s.png ASPCF%s.png Germline%s.png rawprofile%s.png sunrise%s.png Tumor%s.png CopyNumberCaveman%s.csv CopyNumber%s.txt SampleStatistics%s.csv);
+const my @ASCAT_RESULT_FILES => qw( %s.aberrationreliability.png
+                                    %s.ASCATprofile.png
+                                    %s.ASPCF.png
+                                    %s.germline.png
+                                    %s.rawprofile.png
+                                    %s.sunrise.png
+                                    %s.tumour.png
+                                    %s.copynumber.caveman.csv
+                                    %s.copynumber.txt
+                                    %s.samplestatistics.csv
+                                  );
 
 const my $GENDER_MIN => 5;
 
@@ -149,23 +159,12 @@ sub finalise {
   foreach my $f(@ASCAT_RESULT_FILES){
     my $file = sprintf($f, $tum_name);
     my $from = File::Spec->catfile($ascat_out,$file);
+    die "Expected ASCAT output file missing: $from\n" unless(-e $from);
     my $to = File::Spec->catfile($options->{'outdir'},$file);
     move $from,$to;
   }
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
-}
-
-sub getTumourTmp {
-
-}
-
-sub getNormalTmp {
-
-}
-
-sub getAscatTmp {
-
 }
 
 sub get_allele_count_file_path {

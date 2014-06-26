@@ -237,7 +237,7 @@ if(!is.null(ascat.output$nA)) {
 
   gCN[,9]=(2*rho - 2 + (2*(1-rho)+rho*psi)*2^(ascat.bc$Tumor_LogR[,1]/0.55))/rho
 
-  write.table(gCN,paste("CopyNumber",colnames(ascat.output$nA)[1],".txt",sep=""),sep="\t",row.names=T,col.names=NA,quote=F)
+  write.table(gCN,paste(tumour_sample, ".copynumber.txt",sep=""),sep="\t",row.names=T,col.names=NA,quote=F)
 
   ## make input for Caveman:
   cavemanSegs = cbind(seg[,2],
@@ -250,7 +250,7 @@ if(!is.null(ascat.output$nA)) {
 
   rownames(cavemanSegs) = 1:dim(cavemanSegs)[1]
 
-  write.table(cavemanSegs,paste("CopyNumberCaveman",colnames(ascat.output$nA)[1],".csv",sep=""),row.names=T,col.names=F,sep=",",quote=F)
+  write.table(cavemanSegs,paste(tumour_sample,".copynumber.caveman.csv",sep=""),row.names=T,col.names=F,sep=",",quote=F)
 
   normalContamination = 2*(1-rho)/(2*(1-rho)+rho*ascat.output$ploidy[1])
 
@@ -258,7 +258,7 @@ if(!is.null(ascat.output$nA)) {
   rownames(ss) = c("NormalContamination","Ploidy","rho","psi")
   ss[,1] = c(normalContamination,ascat.output$ploidy,rho,psi)
 
-  write.table(ss,paste("SampleStatistics",colnames(ascat.output$nA)[1],".csv",sep=""),row.names=T,col.names=F,quote=F)
+  write.table(ss,paste(tumour_sample,".samplestatistics.csv",sep=""),row.names=T,col.names=F,quote=F)
 
 }
 

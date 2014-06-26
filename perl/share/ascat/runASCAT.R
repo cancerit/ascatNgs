@@ -1,21 +1,21 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd. 
-#  
-# Author: Peter Van Loo <cgpit@sanger.ac.uk> 
-#  
-# This file is part of AscatNGS. 
-#  
-# AscatNGS is free software: you can redistribute it and/or modify it under 
-# the terms of the GNU Affero General Public License as published by the Free 
-# Software Foundation; either version 3 of the License, or (at your option) any 
-# later version. 
-#  
-# This program is distributed in the hope that it will be useful, but WITHOUT 
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more 
-# details. 
-#  
-# You should have received a copy of the GNU Affero General Public License 
+# Copyright (c) 2014 Genome Research Ltd.
+#
+# Author: Peter Van Loo <cgpit@sanger.ac.uk>
+#
+# This file is part of AscatNGS.
+#
+# AscatNGS is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
@@ -39,8 +39,8 @@ if(length(args)==0){
   purity = as.numeric(args[10])
   ploidy = as.numeric(args[11])
   refchrs = args[12]
- 
-  refCN = ifelse(args[13]=="NA",NA,as.numeric(args[13])) 
+
+  refCN = ifelse(args[13]=="NA",NA,as.numeric(args[13]))
   if(is.na(refchrs)||refchrs=="NA") {
   	refchrs = NA
 	}
@@ -51,7 +51,7 @@ if(length(args)==0){
 if(length(dir(pattern=rdat_out))==0) {
 
   ## if the counts exist, skip this step - this can be removed later, but is easier for testing
-  if(length(dir(pattern=tumour_count_file))==0) { 
+  if(length(dir(pattern=tumour_count_file))==0) {
 		stop("Tumour count file missing or inaccessible")
   }
 
@@ -62,7 +62,7 @@ if(length(dir(pattern=rdat_out))==0) {
 
   ## create ASCAT input from read counts
   ## if the LogR file exists, skip this step - this can be removed later, but is easier for testing
-  if(length(dir(pattern=paste(tumour_sample, ".tumour.LogR.txt",sep="")))==0) { 
+  if(length(dir(pattern=paste(tumour_sample, ".tumour.LogR.txt",sep="")))==0) {
 
     tumorcounts = read.table(tumour_count_file,sep="\t")
     normalcounts = read.table(normal_count_file,sep="\t")
@@ -73,7 +73,7 @@ if(length(dir(pattern=rdat_out))==0) {
     SNPpos[,1] = as.vector(normalcounts[,1])
     SNPpos[,2] = normalcounts[,2]
 
-    ## This gives every SNP a name (to be able to do GC correction)				
+    ## This gives every SNP a name (to be able to do GC correction)
     SNPposWithNames = read.table(SNP_pos_with_names,sep="\t",header=T,row.names=1)
 
     ctrans = 1:24
@@ -162,7 +162,7 @@ if(length(dir(pattern=rdat_out))==0) {
 
 ## if RData file exists, read it in
 } else {
-	
+
   load(rdat_out)
 
   ## this can be removed later, but for now, reload ASCAT code before rerunning..
@@ -179,7 +179,7 @@ if(!is.na(refchrs)) {
 
   dchr = strsplit(refchrs,",")[[1]]
 
-  hetsnps = ascat.bc$SNPpos[!is.na(ascat.bc$Germline_BAF[,1]) & 
+  hetsnps = ascat.bc$SNPpos[!is.na(ascat.bc$Germline_BAF[,1]) &
     ascat.bc$Germline_BAF[,1] >= 0.3 & ascat.bc$Germline_BAF[,1] <= 0.7,]
   hetIDs=which(rownames(ascat.bc$SNPpos)%in%rownames(hetsnps))
   hetIDs2=hetIDs[ascat.bc$Tumor_BAF_segmented[[1]]==0.5]
@@ -253,11 +253,11 @@ if(!is.null(ascat.output$nA)) {
   write.table(cavemanSegs,paste("CopyNumberCaveman",colnames(ascat.output$nA)[1],".csv",sep=""),row.names=T,col.names=F,sep=",",quote=F)
 
   normalContamination = 2*(1-rho)/(2*(1-rho)+rho*ascat.output$ploidy[1])
-  
+
   ss = matrix(ncol=1,nrow=4)
   rownames(ss) = c("NormalContamination","Ploidy","rho","psi")
   ss[,1] = c(normalContamination,ascat.output$ploidy,rho,psi)
-    
+
   write.table(ss,paste("SampleStatistics",colnames(ascat.output$nA)[1],".csv",sep=""),row.names=T,col.names=F,quote=F)
 
 }

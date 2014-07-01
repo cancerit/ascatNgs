@@ -96,6 +96,7 @@ sub ascat {
   my $options = shift;
 
   my $tmp = $options->{'tmp'};
+  $tmp = abs_path($tmp);
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});

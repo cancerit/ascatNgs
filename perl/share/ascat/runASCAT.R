@@ -254,9 +254,9 @@ if(!is.null(ascat.output$nA)) {
 
   normalContamination = 2*(1-rho)/(2*(1-rho)+rho*ascat.output$ploidy[1])
 
-  ss = matrix(ncol=1,nrow=4)
-  rownames(ss) = c("NormalContamination","Ploidy","rho","psi")
-  ss[,1] = c(normalContamination,ascat.output$ploidy,rho,psi)
+  ss = matrix(ncol=1,nrow=5)
+  rownames(ss) = c("NormalContamination","Ploidy","rho","psi", "goodnessOfFit")
+  ss[,1] = c(normalContamination,ascat.output$ploidy,rho,psi,ascat.output$goodnessOfFit)
 
   write.table(ss,paste(tumour_sample,".samplestatistics.csv",sep=""),row.names=T,col.names=F,quote=F)
 

@@ -1,5 +1,6 @@
 bin/ascat.pl
 bin/ascat_version.pl
+bin/CN_to_VCF.pl
 bin/cpanm
 docs.tar.gz
 docs/pod_html/_blkbluw.css
@@ -14,6 +15,7 @@ docs/pod_html/_whtnavk.css
 docs/pod_html/_whtprpk.css
 docs/pod_html/_whtpurk.css
 docs/pod_html/ascat.html
+docs/pod_html/CN_to_VCF.html
 docs/pod_html/index.html
 docs/pod_html/Sanger/CGP/Ascat.html
 docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm--subroutine.html
@@ -34,3 +36,12 @@ share/ascat/ascat.R
 share/ascat/runASCAT.R
 t/1_pm_compile.t
 t/2_pl_compile.t
+t/CN_to_VCF.t
+testData/genome_22.fa
+testData/genome_22.fa.fai
+testData/test_segments.txt
+testData/test_segments_bad.txt
+testData/TESTMUT.bam
+testData/TESTMUT.bam.bai
+testData/TESTNORM.bam
+testData/TESTNORM.bam.bai

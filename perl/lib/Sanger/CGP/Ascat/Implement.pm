@@ -96,6 +96,7 @@ sub ascat {
   my $options = shift;
 
   my $tmp = $options->{'tmp'};
+  $tmp = abs_path($tmp);
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
@@ -156,13 +157,40 @@ sub finalise {
 
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
+  my $cave_cn;
   foreach my $f(@ASCAT_RESULT_FILES){
     my $file = sprintf($f, $tum_name);
     my $from = File::Spec->catfile($ascat_out,$file);
     die "Expected ASCAT output file missing: $from\n" unless(-e $from);
     my $to = File::Spec->catfile($options->{'outdir'},$file);
-    move $from,$to;
+    copy $from,$to;
+    $cave_cn = $to if($to =~ m/copynumber.caveman.csv$/);
   }
+  my $new_vcf = $cave_cn;
+  $new_vcf =~ s/\.csv$/\.vcf/;
+  my $command = _which('CN_to_VCF.pl');
+  $command .= " -o $new_vcf";
+  $command .= " -r $options->{reference}";
+  $command .= " -i $cave_cn";
+  $command .= " -sbm $options->{tumour}";
+  $command .= " -sbw $options->{normal}";
+  $command .= " -ra $options->{assembly}" if(defined $options->{'assembly'});
+  $command .= " -rs $options->{species}" if(defined $options->{'species'});
+  $command .= " -msq $options->{protocol} -wsq $options->{protocol}" if(defined $options->{'protocol'});
+  $command .= " -msp $options->{platform} -wsp $options->{platform}" if(defined $options->{'platform'});
+
+  my $vcf_gz = $new_vcf.'.gz';
+  my $bgzip = _which('bgzip');
+  $bgzip .= sprintf ' -c %s > %s', $new_vcf, $vcf_gz;
+
+  my $tabix = _which('tabix');
+  $tabix .= sprintf ' -p vcf %s', $vcf_gz;
+
+  my @commands = ($command, $bgzip, $tabix);
+
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
+
+  unlink $new_vcf;
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 }
@@ -190,6 +218,7 @@ sub _which {
   my $l_bin = $Bin;
   my $path = File::Spec->catfile($l_bin, $prog);
   $path = which($prog) unless(-e $path);
+  die "Failed to find $prog in PATH or local bin folder" unless(defined $path);
   return $path;
 }
 

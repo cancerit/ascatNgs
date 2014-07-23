@@ -45,9 +45,10 @@ use Sanger::CGP::Ascat::Implement;
 
 use PCAP::Cli;
 
-const my @VALID_PROCESS => qw(allele_count ascat);
+const my @VALID_PROCESS => qw(allele_count ascat finalise);
 my %index_max = ( 'allele_count'   => 2,
-                  'ascat' => 1,);
+                  'ascat' => 1,
+                  'finalise' => 1);
 const my @VALID_GENDERS => qw(XX XY L);
 
 {
@@ -62,8 +63,8 @@ const my @VALID_GENDERS => qw(XX XY L);
   # start processes here (in correct order obviously), add conditions for skipping based on 'process' option
   $threads->run(2, 'allele_count', $options) if(!exists $options->{'process'} || $options->{'process'} eq 'allele_count');
 
-  if(!exists $options->{'process'} || $options->{'process'} eq 'ascat') {
-    Sanger::CGP::Ascat::Implement::ascat($options);
+  Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
+  if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
     Sanger::CGP::Ascat::Implement::finalise($options);
     cleanup($options);
   }
@@ -96,6 +97,11 @@ sub setup {
               'sg|snp_gc=s' => \$opts{'snp_gc'},
               'g|gender=s' => \$opts{'gender'},
               'l|locus=s' => \$opts{'locus'},
+              'r|reference=s' => \$opts{'reference'},
+              'rs|species=s' => \$opts{'species'},
+              'ra|assembly=s' => \$opts{'assembly'},
+              'pr|protocol=s' => \$opts{'protocol'},
+              'pl|platform=s' => \$opts{'platform'},
   ) or pod2usage(2);
 
   pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
@@ -116,11 +122,12 @@ sub setup {
   PCAP::Cli::file_for_reading('snp_loci', $opts{'snp_loci'});
   PCAP::Cli::file_for_reading('snp_pos', $opts{'snp_pos'});
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
+  PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
 
   delete $opts{'process'} unless(defined $opts{'process'});
   delete $opts{'index'} unless(defined $opts{'index'});
-  delete $opts{'minbasequal'} unless(defined $opts{'minbasequal'});
+  $opts{'minbasequal'} = 20 unless(defined $opts{'minbasequal'});
 
   if(defined $opts{'gender'}){
     pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
@@ -172,11 +179,14 @@ copy-number analysis pipeline.
 
 ascat.pl [options]
 
+  Please defined as many of the parameters as possible
+
   Required parameters
 
     -outdir       -o    Folder to output result to.
     -tumour       -t    Tumour BAM file
     -normal       -n    Normal BAM file
+    -reference    -r    Reference fasta
     -snp_loci     -s    Snp locus file
     -snp_pos      -sp   Snp position file
     -snp_gc       -sg   Snp GC correction file
@@ -188,7 +198,11 @@ ascat.pl [options]
     -index        -i    Optionally restrict '-p' to single job
 
   Optional parameters
-    -minbasequal  -q    Minimum base quality required before allele is used.
+    -species      -rs   Reference species [BAM HEADER]
+    -assembly     -ra   Reference assembly [BAM HEADER]
+    -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
+    -platform     -pl   Seqeuncing platform [BAM HEADER]
+    -minbasequal  -q    Minimum base quality required before allele is used. [20]
     -cpus         -c    Number of cores to use. [1]
                         - recommend max 2 during 'input' process.
     -locus        -l    Attempt to determine gender using a male specific locus.
@@ -199,4 +213,3 @@ ascat.pl [options]
     -help         -h    Brief help message
     -man          -m    Full documentation.
     -version      -v    Ascat version number
-

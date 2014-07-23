@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
-# ASCAT version 2.3, 13/02/2014
+# ASCAT version 2.3, 15/07/2014
 # author: Peter Van Loo
 # PCF and ASPCF: Gro Nilsen
 # GC correction: Jiqiu Cheng
@@ -595,10 +595,12 @@ ascat.plotSegmentedData = function(ASCATobj) {
 # 2. nB: copy number of the B allele
 # 3. aberrantcellfraction: the aberrant cell fraction of all arrays
 # 4. ploidy: the ploidy of all arrays
-# 5. failedarrays: arrays on which ASCAT analysis failed
-# 6. nonaberrantarrays = arrays on which ASCAT analysis indicates that they so virtually no aberrations
-# 7. segments: an array containing the copy number segments of each sample (not including failed arrays)
-# 8. segments_raw: an array containing the copy number segments of each sample without any rounding applied
+# 5. psi: ploidy parameter, an estimate of the tumour's ploidy for all arrays
+# 6. goodnessOfFit: the goodness of fit for each copy number solution
+# 7. failedarrays: arrays on which ASCAT analysis failed
+# 8. nonaberrantarrays = arrays on which ASCAT analysis indicates that they so virtually no aberrations
+# 9. segments: an array containing the copy number segments of each sample (not including failed arrays)
+# 10. segments_raw: an array containing the copy number segments of each sample without any rounding applied
 # note: for copy number only probes, nA contains the copy number value and nB = 0.
 ascat.runAscat = function(ASCATobj, gamma = 0.55, rho_manual = NA, psi_manual = NA) {
   goodarrays=NULL
@@ -648,11 +650,13 @@ ascat.runAscat = function(ASCATobj, gamma = 0.55, rho_manual = NA, psi_manual = 
     tp = vector(length=length(goodarrays))
     psi = vector(length=length(goodarrays))
     ploidy = vector(length=length(goodarrays))
+    goodnessOfFit = vector(length=length(goodarrays))
     naarrays = NULL
     for (i in 1:length(goodarrays)) {
       tp[i] = res[[goodarrays[i]]]$rho
       psi[i] = res[[goodarrays[i]]]$psi
       ploidy[i] = mean(res[[goodarrays[i]]]$nA+res[[goodarrays[i]]]$nB,na.rm=T)
+      goodnessOfFit[i] = res[[goodarrays[i]]]$goodnessOfFit
       if(res[[goodarrays[i]]]$nonaberrant) {
         naarrays = c(naarrays,ASCATobj$samples[goodarrays[i]])
       }
@@ -661,6 +665,7 @@ ascat.runAscat = function(ASCATobj, gamma = 0.55, rho_manual = NA, psi_manual = 
     names(tp) = colnames(n1)
     names(ploidy) = colnames(n1)
     names(psi) = colnames(n1)
+    names(goodnessOfFit) = colnames(n1)
 
     seg = NULL
     for (i in 1:length(goodarrays)) {
@@ -701,13 +706,15 @@ ascat.runAscat = function(ASCATobj, gamma = 0.55, rho_manual = NA, psi_manual = 
     tp = NULL
     ploidy = NULL
     psi = NULL
+    goodnessOfFit = NULL
     fa = colnames(ASCATobj$Tumor_LogR)
     naarrays = NULL
     seg = NULL
     seg_raw = NULL
   }
 
-  return(list(nA = n1, nB = n2, aberrantcellfraction = tp, ploidy = ploidy, psi = psi, failedarrays = fa, nonaberrantarrays = naarrays, segments = seg, segments_raw = seg_raw))
+  return(list(nA = n1, nB = n2, aberrantcellfraction = tp, ploidy = ploidy, psi = psi, goodnessOfFit = goodnessOfFit,
+         failedarrays = fa, nonaberrantarrays = naarrays, segments = seg, segments_raw = seg_raw))
 }
 
 
@@ -1461,12 +1468,12 @@ runASCAT = function(lrr, baf, lrrsegmented, bafsegmented, gender, SNPpos, chromo
       dev.off()
     }
 
-    return(list(rho = rho_opt1, psi = psi_opt1, nonaberrant = nonaberrant, nA = n1all, nB = n2all, seg = seg, seg_raw = seg_raw))
+    return(list(rho = rho_opt1, psi = psi_opt1, goodnessOfFit = goodnessOfFit_opt1, nonaberrant = nonaberrant, nA = n1all, nB = n2all, seg = seg, seg_raw = seg_raw))
 
   }
 
   else {
-    return(list(rho = NA, psi = NA, nonaberrant = F, nA = NA, nB = NA, seg = NA, seg_raw = NA))
+    return(list(rho = NA, psi = NA, goodnessOfFit = NA, nonaberrant = F, nA = NA, nB = NA, seg = NA, seg_raw = NA))
   }
 
 }

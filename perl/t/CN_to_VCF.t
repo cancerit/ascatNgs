@@ -94,8 +94,8 @@ my $EXP_OUT = "##fileformat=VCFv4.1\n".
                 "##SAMPLE=<ID=NORMAL,Description=\"$norm_desc\",Accession=$norm_accession,Platform=$norm_platform,Protocol=$norm_protocol,SampleName=TESTNORM,Source=$norm_source,Study=$norm_study>\n".
                 "##SAMPLE=<ID=TUMOUR,Description=\"$mut_desc\",Accession=$mut_accession,Platform=$mut_platform,Protocol=$mut_protocol,SampleName=TESTMUT,Source=$mut_source,Study=$mut_study>\n".
                 "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOUR\n".
-                "22\t10000010\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\t./.:2:1\t./.:3:1\n".
-                "22\t10000025\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\t./.:2:1\t./.:5:2\n";
+                "22\t10000009\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\t./.:2:1\t./.:3:1\n".
+                "22\t10000024\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\t./.:2:1\t./.:5:2\n";
 
 
 subtest 'Good segments file test' => sub{
@@ -117,7 +117,7 @@ subtest 'Good segments file test' => sub{
       $result_out .= $_;
     }
   close($FH);
-  ok($EXP_OUT eq $result_out,'Compare output results for good segment file');
+  is($result_out, $EXP_OUT, 'Compare output results for good segment file');
 
   unlink($outfile);
 };
@@ -127,7 +127,7 @@ subtest 'Good segments STDOUT test' => sub{
 
   my $res = `$newcommand`;
 
-  ok($EXP_OUT eq $res,'Compare output STDOUT results for good segment file');
+  is($res,$EXP_OUT,'Compare output STDOUT results for good segment file');
 };
 
 subtest 'Good segments STDIN and STDOUT test' => sub {
@@ -135,7 +135,7 @@ subtest 'Good segments STDIN and STDOUT test' => sub {
 
   my $res = `$newcommand`;
 
-  ok($EXP_OUT eq $res,'Compare output STDOUT results for good segment file');
+  is($res,$EXP_OUT,'Compare output STDOUT results for good segment file');
 };
 
 subtest 'Bad segments check for error' => sub {
@@ -153,12 +153,12 @@ subtest 'Bad segments check for error' => sub {
     $cnt++;
     my $line = $_;
     if($cnt == 1){
-      ok(($stderr =~ m/^Error! Reading from: |STDIN| Writing to: |STDOUT|/),'Check for error message');
+      like($stderr, qr/^Error! Reading from: |STDIN| Writing to: |STDOUT|/,'Check for error message');
     }elsif($cnt == 3){
-      ok(($stderr =~ m/^Unrecognised format in CN segments passed/),'Check for error message segments');
+      like($stderr, qr/^Unrecognised format in CN segments passed/,'Check for error message segments');
     }
   }
-  ok($return != 1,'Check for error return value');
+  isnt($return, 1,'Check for error return value');
 };
 
 done_testing();

@@ -30,7 +30,8 @@ WriteMakefile(
   NAME          => 'AscatNgs',
   VERSION_FROM  => 'lib/Sanger/CGP/Ascat.pm',
   EXE_FILES     => [qw( bin/ascat_version.pl
-                        bin/ascat.pl)],
+                        bin/ascat.pl
+                        bin/CN_to_VCF.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                    }

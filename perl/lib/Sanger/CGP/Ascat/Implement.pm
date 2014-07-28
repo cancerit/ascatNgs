@@ -168,7 +168,8 @@ sub finalise {
   }
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
-  my $command = _which('CN_to_VCF.pl');
+  my $command = "$^X ";
+  $command .= _which('CN_to_VCF.pl');
   $command .= " -o $new_vcf";
   $command .= " -r $options->{reference}";
   $command .= " -i $cave_cn";

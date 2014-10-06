@@ -77,11 +77,10 @@ sub allele_count {
     my $sname = sanitised_sample_from_bam($input);
     my $alleleCountOut = File::Spec->catfile($ac_out,$sname .'.allct');
 
-    my $allc_exe = _which('alleleCounter.pl');
+    my $allc_exe = _which('alleleCounter');
     my $allc_lib = dirname($allc_exe);
 
-    my $command = "$^X ";
-    $command .= $allc_exe;
+    my $command = $allc_exe;
     $command .= sprintf $ALLELE_COUNT_PARA, $input, $alleleCountOut, $options->{'snp_loci'};
     $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
 

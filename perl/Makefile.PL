@@ -28,6 +28,7 @@ install_share module => 'Sanger::CGP::Ascat::Implement', 'share';
 
 WriteMakefile(
   NAME          => 'AscatNgs',
+  LICENSE       => 'agpl_3', # http://search.cpan.org/~dagolden/CPAN-Meta-2.142690/lib/CPAN/Meta/Spec.pm#license
   VERSION_FROM  => 'lib/Sanger/CGP/Ascat.pm',
   EXE_FILES     => [qw( bin/ascat_version.pl
                         bin/ascat.pl

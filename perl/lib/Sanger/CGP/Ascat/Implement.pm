@@ -44,6 +44,8 @@ use PCAP::Bam;
 
 const my $COUNT_READS => q{%s view -c %s %s};
 
+const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0goodnessOfFit 0\n};
+
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s ';
 
 const my @ASCAT_RESULT_FILES => qw( %s.aberrationreliability.png
@@ -157,13 +159,36 @@ sub finalise {
   my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   my $cave_cn;
+  my $force_complete = 0;
+  my @commands;
   foreach my $f(@ASCAT_RESULT_FILES){
     my $file = sprintf($f, $tum_name);
     my $from = File::Spec->catfile($ascat_out,$file);
-    die "Expected ASCAT output file missing: $from\n" unless(-e $from);
-    my $to = File::Spec->catfile($options->{'outdir'},$file);
-    copy $from,$to;
-    $cave_cn = $to if($to =~ m/copynumber.caveman.csv$/);
+    if(!-e $from) {
+      if(exists $options->{'force'} && defined $options->{'force'}) {
+        $force_complete = 1;
+      }
+      else {
+        die "Expected ASCAT output file missing: $from\n";
+      }
+    }
+    else {
+      my $to = File::Spec->catfile($options->{'outdir'},$file);
+      copy $from,$to;
+      $cave_cn = $to if($to =~ m/copynumber.caveman.csv$/);
+    }
+  }
+  if($force_complete == 1) {
+    my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
+    my $fake_csv = "$^X ";
+    $fake_csv .= _which('failed_cn_csv.pl');
+    $fake_csv .= sprintf ' -r %s -o %s', $options->{'reference'}, $fake_file;
+    push @commands, $fake_csv;
+    my $samp_stat_file = sprintf '%s/%s.samplestatistics.csv', $options->{'outdir'}, $tum_name;
+    open my $STAT, '>', $samp_stat_file;
+    print $STAT $FAILED_SAMPLE_STATISTICS or die "Failed to write line to $samp_stat_file";
+    close $STAT;
+    $cave_cn = $fake_file;
   }
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
@@ -186,7 +211,7 @@ sub finalise {
   my $tabix = _which('tabix');
   $tabix .= sprintf ' -p vcf %s', $vcf_gz;
 
-  my @commands = ($command, $bgzip, $tabix);
+  push @commands, $command, $bgzip, $tabix;
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 

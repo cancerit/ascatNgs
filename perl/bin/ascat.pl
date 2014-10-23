@@ -102,6 +102,7 @@ sub setup {
               'ra|assembly=s' => \$opts{'assembly'},
               'pr|protocol=s' => \$opts{'protocol'},
               'pl|platform=s' => \$opts{'platform'},
+              'f|force' => \$opts{'force'},
   ) or pod2usage(2);
 
   pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
@@ -207,6 +208,11 @@ ascat.pl [options]
                         - recommend max 2 during 'input' process.
     -locus        -l    Attempt to determine gender using a male specific locus.
                           e.g. Y:2654896-2655740 (GRCh37)
+    -force        -f    Force completion - solution not possible
+                        - adding this will result in successful completion of analysis even
+                          when ASCAT can't generate a solution.  A default copynumber of 5/2
+                          (tumour/normal) and contamination of 30% will be set along with a
+                          comment in '*.samplestatistics.csv' to indicate this has occurred.
 
 
   Other

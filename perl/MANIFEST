@@ -2,6 +2,7 @@ bin/ascat.pl
 bin/ascat_version.pl
 bin/CN_to_VCF.pl
 bin/cpanm
+bin/failed_cn_csv.pl
 docs.tar.gz
 docs/pod_html/_blkbluw.css
 docs/pod_html/_blkcynw.css
@@ -16,6 +17,7 @@ docs/pod_html/_whtprpk.css
 docs/pod_html/_whtpurk.css
 docs/pod_html/ascat.html
 docs/pod_html/CN_to_VCF.html
+docs/pod_html/failed_cn_csv.html
 docs/pod_html/index.html
 docs/pod_html/Sanger/CGP/Ascat.html
 docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm--subroutine.html

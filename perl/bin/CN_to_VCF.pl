@@ -123,7 +123,7 @@ use Sanger::CGP::Vcf::VcfProcessLog;
                                                                       && defined($mt_cn_tot)
                                                                       && defined($mt_cn_min));
 
-      my $start_allele = $fai->fetch("$chr:$start-$start");
+      my $start_allele = $fai->fetch("$chr:$start-$start") || '.';
       print $OUT_FH $record_converter->generate_record($chr,$start,$end,$start_allele,$wt_cn_tot,$wt_cn_min,$mt_cn_tot,$mt_cn_min);
     }
 

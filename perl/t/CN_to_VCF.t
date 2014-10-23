@@ -94,8 +94,8 @@ my $EXP_OUT = "##fileformat=VCFv4.1\n".
                 "##SAMPLE=<ID=NORMAL,Description=\"$norm_desc\",Accession=$norm_accession,Platform=$norm_platform,Protocol=$norm_protocol,SampleName=TESTNORM,Source=$norm_source,Study=$norm_study>\n".
                 "##SAMPLE=<ID=TUMOUR,Description=\"$mut_desc\",Accession=$mut_accession,Platform=$mut_platform,Protocol=$mut_protocol,SampleName=TESTMUT,Source=$mut_source,Study=$mut_study>\n".
                 "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOUR\n".
-                "22\t10000009\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\t./.:2:1\t./.:3:1\n".
-                "22\t10000024\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\t./.:2:1\t./.:5:2\n";
+                "22\t10000009\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\tGT:TCN:MCN\t./.:2:1\t./.:3:1\n".
+                "22\t10000024\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\tGT:TCN:MCN\t./.:2:1\t./.:5:2\n";
 
 
 subtest 'Good segments file test' => sub{

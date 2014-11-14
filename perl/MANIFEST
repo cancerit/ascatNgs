@@ -20,14 +20,14 @@ docs/pod_html/CN_to_VCF.html
 docs/pod_html/failed_cn_csv.html
 docs/pod_html/index.html
 docs/pod_html/Sanger/CGP/Ascat.html
-docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm--subroutine.html
-docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm.html
 docs/reports_html/common.js
 docs/reports_html/cover.css
 docs/reports_html/coverage.html
 docs/reports_html/css.js
 docs/reports_html/digests
 docs/reports_html/index.html
+docs/reports_html/lib-Sanger-CGP-Ascat-pm--subroutine.html
+docs/reports_html/lib-Sanger-CGP-Ascat-pm.html
 docs/reports_html/standardista-table-sorting.js
 docs/reports_text/coverage.txt
 lib/Sanger/CGP/Ascat.pm
@@ -37,6 +37,7 @@ MANIFEST			This list of files
 perltidy.LOG
 share/ascat/ascat.R
 share/ascat/runASCAT.R
+share/gender/GRCh37d5_Y.loci
 t/1_pm_compile.t
 t/2_pl_compile.t
 t/CN_to_VCF.t

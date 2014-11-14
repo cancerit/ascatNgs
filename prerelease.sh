@@ -45,7 +45,7 @@ echo '### Running perl tests ###'
 export HARNESS_PERL_SWITCHES=-MDevel::Cover=-db,reports,-ignore,'t/.*\.t'
 rm -rf docs
 mkdir -p docs/reports_text
-prove --nocolor -I lib t | sed 's/^/  /' # indent output of prove
+prove -w --nocolor -I lib t | sed 's/^/  /' # indent output of prove
 if [[ $? -ne 0 ]] ; then
   echo "\n\tERROR: TESTS FAILED\n"
   exit 1

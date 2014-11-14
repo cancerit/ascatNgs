@@ -130,16 +130,6 @@ sub setup {
   delete $opts{'index'} unless(defined $opts{'index'});
   $opts{'minbasequal'} = 20 unless(defined $opts{'minbasequal'});
 
-  if(defined $opts{'gender'}){
-    pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
-    if($opts{'gender'} eq 'L') {
-      $opts{'gender'} = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
-    }
-  } else {
-    pod2usage(-message => 'gender not set', -verbose => 1);
-  }
-
-
   if(exists $opts{'process'}) {
     PCAP::Cli::valid_process('process', $opts{'process'}, \@VALID_PROCESS);
     if(exists $opts{'index'}) {
@@ -163,6 +153,15 @@ sub setup {
   make_path($logs) unless(-d $logs);
 
   $opts{'tmp'} = $tmpdir;
+
+  if(defined $opts{'gender'}){
+    pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
+    if($opts{'gender'} eq 'L') {
+      $opts{'gender'} = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
+    }
+  } else {
+    pod2usage(-message => 'gender not set', -verbose => 1);
+  }
 
   return \%opts;
 }
@@ -206,8 +205,8 @@ ascat.pl [options]
     -minbasequal  -q    Minimum base quality required before allele is used. [20]
     -cpus         -c    Number of cores to use. [1]
                         - recommend max 2 during 'input' process.
-    -locus        -l    Attempt to determine gender using a male specific locus.
-                          e.g. Y:2654896-2655740 (GRCh37)
+    -locus        -l    Using a list of loci, default when '-L' [share/gender/GRCh37d5_Y.loci]
+                        - these are loci that will not present at all in a female sample
     -force        -f    Force completion - solution not possible
                         - adding this will result in successful completion of analysis even
                           when ASCAT can't generate a solution.  A default copynumber of 5/2

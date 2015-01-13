@@ -19,4 +19,4 @@ no_index:
     - inc
 requires:
   Const::Fast: '0.014'
-version: v1.5.0
+version: v1.5.1

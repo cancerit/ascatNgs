@@ -284,25 +284,16 @@ sub determine_gender {
   }
 
   my $command = _which('alleleCounter');
-  $command .= sprintf $ALLELE_COUNT_PARA, $options->{'tumour'}, File::Spec->catfile($options->{'tmp'}, 'tumour_gender.tsv'), $gender_loci;
-  $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
-  system($command);
-  my $tum_gender = _parse_gender_results(File::Spec->catfile($options->{'tmp'}, 'tumour_gender.tsv'));
-  $command = _which('alleleCounter');
   $command .= sprintf $ALLELE_COUNT_PARA, $options->{'normal'}, File::Spec->catfile($options->{'tmp'}, 'normal_gender.tsv'), $gender_loci;
   $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
   system($command);
   my $norm_gender = _parse_gender_results(File::Spec->catfile($options->{'tmp'}, 'normal_gender.tsv'));
-  if($tum_gender ne $norm_gender) {
-    die "Gender loci gacve incolclusive results see $options->{tmp}/*_gender.tsv";
-  }
-  return $tum_gender;
+  return $norm_gender;
 }
 
 sub _parse_gender_results {
   my $file = shift @_;
-  my $male_loci = 0;
-  my $total_loci = 0;
+  my $gender = 'XX';
   open my $fh, '<', $file;
   while(my $line = <$fh>) {
     next if($line =~ m/^#/);
@@ -310,14 +301,12 @@ sub _parse_gender_results {
     #CHR	POS	Count_A	Count_C	Count_G	Count_T	Good_depth
     my ($chr, $pos, $a, $c, $g, $t, $depth) = split /\t/, $line;
     # all we really care about is the depth
-    $male_loci++ if($depth > 5);
-    $total_loci++;
+    if($depth > 5) {
+      $gender = 'XY';
+      last; # presence of ANY male loci in normal is sufficient, we shouldn't be using this to check for 'matchedness'
+    }
   }
   close $fh;
-  my $gender = 'XX';
-  if($male_loci/$total_loci >= 0.5) {
-    $gender = 'XY';
-  }
   return $gender;
 }
 

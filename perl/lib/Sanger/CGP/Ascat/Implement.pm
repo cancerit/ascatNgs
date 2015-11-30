@@ -141,6 +141,11 @@ sub ascat {
   $command .= ' '.$normcountfile;
   $command .= ' '.$options->{'gender'};
   $command .= ' '.$rdata;
+  
+  if(defined($options->{'ploidy'}) && defined($options->{'purity'})){
+    $command .= ' '.$options->{'purity'};
+    $command .= ' '.$options->{'ploidy'};
+  }
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, 0);
 

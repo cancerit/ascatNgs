@@ -102,6 +102,8 @@ sub setup {
               'ra|assembly=s' => \$opts{'assembly'},
               'pr|protocol=s' => \$opts{'protocol'},
               'pl|platform=s' => \$opts{'platform'},
+              'pu|purity=s' => \$opts{'purity'},
+              'pi|ploidy=s' => \$opts{'ploidy'},
               'f|force' => \$opts{'force'},
   ) or pod2usage(2);
 
@@ -118,6 +120,10 @@ sub setup {
   for(keys %opts) { $defined++ if(defined $opts{$_}); }
   pod2usage(-msg  => "\nERROR: Options must be defined.\n", -verbose => 1,  -output => \*STDERR) unless($defined);
 
+  if((defined($opts{'purity'}) && !defined($opts{'ploidy'})) || (!defined($opts{'purity'}) && defined($opts{'ploidy'}))){
+    pod2usage(-msg  => "\nERROR: If one of purity/ploidy are defined, both should be defined.\n", -verbose => 1,  -output => \*STDERR);
+  }
+
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
   PCAP::Cli::file_for_reading('snp_loci', $opts{'snp_loci'});
@@ -125,6 +131,12 @@ sub setup {
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
+
+  my $final_logs = File::Spec->catdir($opts{'outdir'}, 'logs');
+  if(-e $final_logs) {
+    warn "NOTE: Presence of '$final_logs' directory suggests successful complete analysis, please delete to rerun\n";
+    exit 0;
+  }
 
   delete $opts{'process'} unless(defined $opts{'process'});
   delete $opts{'index'} unless(defined $opts{'index'});
@@ -212,7 +224,8 @@ ascat.pl [options]
                           when ASCAT can't generate a solution.  A default copynumber of 5/2
                           (tumour/normal) and contamination of 30% will be set along with a
                           comment in '*.samplestatistics.csv' to indicate this has occurred.
-
+    -purity       -pu   Purity (rho) setting for manual setting of sunrise plot location
+    -ploidy       -pi   Ploidy (psi) setting for manual setting of sunrise plot location
 
   Other
     -help         -h    Brief help message

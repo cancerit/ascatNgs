@@ -119,7 +119,7 @@ sub setup {
   my $defined;
   for(keys %opts) { $defined++ if(defined $opts{$_}); }
   pod2usage(-msg  => "\nERROR: Options must be defined.\n", -verbose => 1,  -output => \*STDERR) unless($defined);
-  
+
   if((defined($opts{'purity'}) && !defined($opts{'ploidy'})) || (!defined($opts{'purity'}) && defined($opts{'ploidy'}))){
     pod2usage(-msg  => "\nERROR: If one of purity/ploidy are defined, both should be defined.\n", -verbose => 1,  -output => \*STDERR);
   }
@@ -131,6 +131,12 @@ sub setup {
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
+
+  my $final_logs = File::Spec->catdir($opts{'outdir'}, 'logs');
+  if(-e $final_logs) {
+    warn "NOTE: Presence of '$final_logs' directory suggests successful complete analysis, please delete to rerun\n";
+    exit 0;
+  }
 
   delete $opts{'process'} unless(defined $opts{'process'});
   delete $opts{'index'} unless(defined $opts{'index'});

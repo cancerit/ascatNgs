@@ -66,7 +66,7 @@ const my @VALID_GENDERS => qw(XX XY L);
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
     Sanger::CGP::Ascat::Implement::finalise($options);
-    cleanup($options);
+    cleanup($options) unless(defined($options->{'noclean'}) && $options->{'noclean'} == 1);
   }
 }
 
@@ -105,6 +105,7 @@ sub setup {
               'pu|purity=s' => \$opts{'purity'},
               'pi|ploidy=s' => \$opts{'ploidy'},
               'f|force' => \$opts{'force'},
+              'nc|noclean' => \$opts{'noclean'},
   ) or pod2usage(2);
 
   pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
@@ -226,6 +227,8 @@ ascat.pl [options]
                           comment in '*.samplestatistics.csv' to indicate this has occurred.
     -purity       -pu   Purity (rho) setting for manual setting of sunrise plot location
     -ploidy       -pi   Ploidy (psi) setting for manual setting of sunrise plot location
+    -noclean      -nc   Finalise results but don't clean up the tmp directory.
+                        - Useful when including a manual check and restarting ascat with new pu and pi params.
 
   Other
     -help         -h    Brief help message

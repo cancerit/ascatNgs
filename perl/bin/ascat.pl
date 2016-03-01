@@ -66,7 +66,7 @@ const my @VALID_GENDERS => qw(XX XY L);
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
     Sanger::CGP::Ascat::Implement::finalise($options);
-    cleanup($options) unless(defined($options->{'noclean'}) && $options->{'noclean'} == 1);
+    cleanup($options) unless($options->{'noclean'} == 1);
   }
 }
 
@@ -114,6 +114,10 @@ sub setup {
   if($opts{'v'}){
     print Sanger::CGP::Ascat->VERSION."\n";
     exit;
+  }
+
+  if(!defined($opts{'noclean'})){
+    $opts{'noclean'} = 0;
   }
 
   # then check for no args:

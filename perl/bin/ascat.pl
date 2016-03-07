@@ -129,6 +129,10 @@ sub setup {
     pod2usage(-msg  => "\nERROR: If one of purity/ploidy are defined, both should be defined.\n", -verbose => 1,  -output => \*STDERR);
   }
 
+  for my $item(qw(tumour normal snp_loci snp_pos snp_gc reference outdir locus)) {
+    $opts{$item} = File::Spec->rel2abs( $opts{$item} ) if(defined $opts{$item});
+  }
+
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
   PCAP::Cli::file_for_reading('snp_loci', $opts{'snp_loci'});

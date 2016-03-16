@@ -32,8 +32,12 @@ WriteMakefile(
   VERSION_FROM  => 'lib/Sanger/CGP/Ascat.pm',
   EXE_FILES     => [qw( bin/ascat_version.pl
                         bin/ascat.pl
-                        bin/CN_to_VCF.pl
-                        bin/failed_cn_csv.pl)],
+                        bin/ascatCnToVCF.pl
+                        bin/ascatFailedCnCsv.pl
+                        bin/ascatSnpPanelGcCorrections.pl
+                        bin/ascatSnpPanelGenerator.pl
+                        bin/ascatSnpPanelMerge.pl
+                        bin/ascatFaiChunk.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                    }

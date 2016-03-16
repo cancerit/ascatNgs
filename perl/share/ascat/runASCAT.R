@@ -258,7 +258,7 @@ if(!is.null(ascat.output$nA)) {
   rownames(ss) = c("NormalContamination","Ploidy","rho","psi", "goodnessOfFit")
   ss[,1] = c(normalContamination,ascat.output$ploidy,rho,psi,ascat.output$goodnessOfFit)
 
-  write.table(ss,paste(tumour_sample,".samplestatistics.csv",sep=""),row.names=T,col.names=F,quote=F)
+  write.table(ss,paste(tumour_sample,".samplestatistics.txt",sep=""),row.names=T,col.names=F,quote=F)
 
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ########## LICENCE ##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-16 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -40,6 +40,9 @@ WriteMakefile(
                         bin/ascatFaiChunk.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
+                     'Bio::DB::HTS' => 1.11,
+                     'Try::Tiny' => 0.24,
+                     'autodie' => 2.29,
                    }
 );
 

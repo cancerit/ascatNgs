@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: David Jones <cgpit@sanger.ac.uk>
 #
@@ -34,7 +34,7 @@ use autodie qw(:all);
 use Getopt::Long;
 use Pod::Usage qw(pod2usage);
 
-use Bio::DB::Sam;
+use Bio::DB::HTS;
 use Try::Tiny;
 use PCAP::Cli;
 
@@ -51,8 +51,8 @@ use Sanger::CGP::Vcf::VcfProcessLog;
 {
   my $opts = setup();
 
-  my $mt_sam = Bio::DB::Sam->new(-bam => $opts->{'sbm'}, -fasta => $opts->{'r'});
-  my $wt_sam = Bio::DB::Sam->new(-bam => $opts->{'sbw'}, -fasta => $opts->{'r'});
+  my $mt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbm'}, -fasta => $opts->{'r'});
+  my $wt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbw'}, -fasta => $opts->{'r'});
 
   #parse samples and contigs from the bam files.
   my $contigs = Sanger::CGP::Vcf::BamUtil->parse_contigs($mt_sam->header->text.$wt_sam->header->text,$opts->{'rs'},$opts->{'ra'});
@@ -108,7 +108,7 @@ use Sanger::CGP::Vcf::VcfProcessLog;
 
 
     #Iterate through input and create a record for each.
-    my $fai = Bio::DB::Sam::Fai->load($opts->{'r'});
+    my $fai = Bio::DB::HTS::Fai->load($opts->{'r'});
     while(<$IN_FH>){
       my $line = $_;
       chomp($line);

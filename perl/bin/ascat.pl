@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -38,8 +38,6 @@ use Pod::Usage qw(pod2usage);
 use List::Util qw(first);
 use Const::Fast qw(const);
 use File::Copy;
-
-use Data::Dumper;
 
 use Sanger::CGP::Ascat::Implement;
 

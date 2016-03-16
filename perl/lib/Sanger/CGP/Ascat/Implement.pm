@@ -57,10 +57,17 @@ const my @ASCAT_RESULT_FILES => qw( %s.aberrationreliability.png
                                     %s.tumour.png
                                     %s.copynumber.caveman.csv
                                     %s.copynumber.txt
-                                    %s.samplestatistics.csv
+                                    %s.samplestatistics.txt
                                   );
 
 const my $GENDER_MIN => 5;
+
+sub new {
+  my $class = shift;
+  my $self = {};
+  bless $self, $class;
+  return $self;
+}
 
 sub allele_count {
   my ($index, $options) = @_;
@@ -141,7 +148,7 @@ sub ascat {
   $command .= ' '.$normcountfile;
   $command .= ' '.$options->{'gender'};
   $command .= ' '.$rdata;
-  
+
   if(defined($options->{'ploidy'}) && defined($options->{'purity'})){
     $command .= ' '.$options->{'purity'};
     $command .= ' '.$options->{'ploidy'};
@@ -189,7 +196,7 @@ sub finalise {
     $fake_csv .= _which('failed_cn_csv.pl');
     $fake_csv .= sprintf ' -r %s -o %s', $options->{'reference'}, $fake_file;
     push @commands, $fake_csv;
-    my $samp_stat_file = sprintf '%s/%s.samplestatistics.csv', $options->{'outdir'}, $tum_name;
+    my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
     open my $STAT, '>', $samp_stat_file;
     print $STAT $FAILED_SAMPLE_STATISTICS or die "Failed to write line to $samp_stat_file";
     close $STAT;

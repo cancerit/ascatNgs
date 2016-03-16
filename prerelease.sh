@@ -42,7 +42,7 @@ cd $MY_PATH/perl
 
 echo '### Running perl tests ###'
 
-export HARNESS_PERL_SWITCHES=-MDevel::Cover=-db,reports,-ignore,'t/.*\.t'
+export HARNESS_PERL_SWITCHES=-MDevel::Cover=-db,reports,-select='^lib/*\.pm$',-ignore,'^t/'
 rm -rf docs
 mkdir -p docs/reports_text
 prove -w -I lib t

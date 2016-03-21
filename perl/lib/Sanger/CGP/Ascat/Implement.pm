@@ -44,7 +44,7 @@ use PCAP::Bam;
 
 const my $COUNT_READS => q{%s view -c %s %s};
 
-const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0goodnessOfFit 0\n};
+const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s ';
 
@@ -193,7 +193,7 @@ sub finalise {
   if($force_complete == 1) {
     my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
     my $fake_csv = "$^X ";
-    $fake_csv .= _which('failed_cn_csv.pl');
+    $fake_csv .= _which('ascatFailedCnCsv.pl');
     $fake_csv .= sprintf ' -r %s -o %s', $options->{'reference'}, $fake_file;
     push @commands, $fake_csv;
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
@@ -205,7 +205,7 @@ sub finalise {
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
   my $command = "$^X ";
-  $command .= _which('CN_to_VCF.pl');
+  $command .= _which('ascatCnToVCF.pl');
   $command .= " -o $new_vcf";
   $command .= " -r $options->{reference}";
   $command .= " -i $cave_cn";

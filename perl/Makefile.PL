@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ########## LICENCE ##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-16 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -32,10 +32,13 @@ WriteMakefile(
   VERSION_FROM  => 'lib/Sanger/CGP/Ascat.pm',
   EXE_FILES     => [qw( bin/ascat_version.pl
                         bin/ascat.pl
-                        bin/CN_to_VCF.pl
-                        bin/failed_cn_csv.pl)],
+                        bin/ascatCnToVCF.pl
+                        bin/ascatFailedCnCsv.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
+                     'Bio::DB::HTS' => 1.11,
+                     'Try::Tiny' => 0.24,
+                     'autodie' => 2.29,
                    }
 );
 

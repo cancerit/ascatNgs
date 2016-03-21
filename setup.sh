@@ -98,6 +98,13 @@ if [[ "x$VCF" == "x" ]] ; then
   exit 1;
 fi
 
+HTS=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+if [[ "x$HTS" == "x" ]] ; then
+  echo "PREREQUISITE: Please install Bio::DB::HTS before proceeding:"
+  echo "  https://github.com/Ensembl/Bio-HTS/releases"
+  exit 1;
+fi
+
 perlmods=( "File::ShareDir" "File::ShareDir::Install" )
 
 set -e
@@ -146,5 +153,14 @@ echo "Please add the following to beginning of PERL5LIB:"
 echo "  $PERLROOT"
 echo "  $PERLARCH"
 echo
+
+echo "!!! If you have pre-v1.8 installations of ascatNgs you may want to remove the following:";
+echo -e "\t$INST_PATH/bin/CN_to_VCF.pl"
+echo -e "\t$INST_PATH/bin/failed_cn_csv.pl"
+echo "  These have been renamed to the following:";
+echo -e "\t$INST_PATH/bin/ascatCnToVCF.pl"
+echo -e "\t$INST_PATH/bin/ascatFailedCnCsv.pl"
+echo
+
 
 exit 0

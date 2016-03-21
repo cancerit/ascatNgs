@@ -1,6 +1,6 @@
 LICENCE
 =======
-Copyright (c) 2014 Genome Research Ltd.
+Copyright (c) 2014-2016 Genome Research Ltd.
 
 Author: CancerIT <cgpit@sanger.ac.uk>
 
@@ -43,6 +43,8 @@ Please install the following first:
 
 * [PCAP-core](http://github.com/ICGC-TCGA-PanCancer/PCAP-core/releases)
 * [alleleCount](https://github.com/cancerit/alleleCount/releases)
+* [cgpVcf](https://github.com/cancerit/cgpVcf/releases)
+* [Bio-HTS](https://github.com/Ensembl/Bio-HTS/releases)
 
 Please see these for any child dependencies.
 
@@ -60,7 +62,7 @@ Please be aware that this software requires the Rscript executable to be pre-ins
 * Pull a clean version of the repo and use this for the following steps.
 
 ####Cutting the release
-1. Update `perl/lib/Sanger/CGP/Ascat.pm` to the correct version (adding rc/beta to end if applicable).
+1. Update `perl/lib/Sanger/CGP/Ascat.pm` to the correct version.
 2. Run `./prerelease.sh`
 3. Check all tests and coverage reports are acceptable.
 4. Commit the updated docs tree and updated module/version.

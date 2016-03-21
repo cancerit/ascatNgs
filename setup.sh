@@ -98,6 +98,13 @@ if [[ "x$VCF" == "x" ]] ; then
   exit 1;
 fi
 
+HTS=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+if [[ "x$HTS" == "x" ]] ; then
+  echo "PREREQUISITE: Please install Bio::DB::HTS before proceeding:"
+  echo "  https://github.com/Ensembl/Bio-HTS/releases"
+  exit 1;
+fi
+
 perlmods=( "File::ShareDir" "File::ShareDir::Install" )
 
 set -e

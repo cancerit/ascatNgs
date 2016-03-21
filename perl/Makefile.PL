@@ -33,11 +33,7 @@ WriteMakefile(
   EXE_FILES     => [qw( bin/ascat_version.pl
                         bin/ascat.pl
                         bin/ascatCnToVCF.pl
-                        bin/ascatFailedCnCsv.pl
-                        bin/ascatSnpPanelGcCorrections.pl
-                        bin/ascatSnpPanelGenerator.pl
-                        bin/ascatSnpPanelMerge.pl
-                        bin/ascatFaiChunk.pl)],
+                        bin/ascatFailedCnCsv.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                      'Bio::DB::HTS' => 1.11,

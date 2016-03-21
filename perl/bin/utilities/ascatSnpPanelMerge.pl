@@ -24,9 +24,22 @@
 use strict;
 use Bio::DB::HTS::Faidx;
 
-if(@ARGV < 2) {
-  die "\tUSAGE: perl snpPanelMerge.pl genome.fa snpPanelGeneratorOut.1 [..N]";
-}
+my $usage = <<'USAGE_END';
+
+USAGE: perl ascatSnpPanelMerge.pl genome.fa ascatSnpPanelGeneratorOut.1 [..N]
+
+  Takes the output files from ascatSnpPanelGenerator.pl and identifies common
+  SNPs from the set of normal samples.
+
+  A HET SNP is generated if it exists in >66% of samples.
+  A HOM SNP is generated if it exists in >33% of samples.
+
+  Locations with more than 2 alleles expressed across the panel are excluded.
+  Locations within 500bp of another potential SNP are excluded.
+
+USAGE_END
+
+die $usage if(@ARGV < 2);
 
 my $ref = shift @ARGV;
 

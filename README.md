@@ -11,6 +11,7 @@ For details of the underlying algorithm please see the [ASCAT](http://heim.ifi.u
 Please install the following first:
 
 * [PCAP-core v2.0+](http://github.com/ICGC-TCGA-PanCancer/PCAP-core/releases)
+  * `ascatNgs` has other dependancies fulfilled by `PCAP-core`.
 * [cgpVcf v2.0+](https://github.com/cancerit/cgpVcf/releases)
 * [alleleCount v3.0+](https://github.com/cancerit/alleleCount/releases)
 

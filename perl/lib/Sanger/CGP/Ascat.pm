@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -26,14 +26,14 @@ use strict;
 use Const::Fast qw(const);
 use base 'Exporter';
 
-our $VERSION = '1.7.2';
+our $VERSION = '2.0.0';
 our @EXPORT = qw($VERSION);
 
 const my $LICENSE =>
-'#################
-# Copyright (c) 2014 Genome Research Ltd.
+'##########LICENCE##########
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
-# Author: Peter Van Loo <cgpit@sanger.ac.uk>
+# Author: CancerIT <cgpit@sanger.ac.uk>
 #
 # This file is part of AscatNGS.
 #
@@ -49,7 +49,7 @@ const my $LICENSE =>
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#################';
+##########LICENCE##########';
 
 sub license {
   return sprintf $LICENSE, $VERSION;

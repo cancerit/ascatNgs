@@ -44,7 +44,7 @@ use Sanger::CGP::Ascat::Implement;
 use PCAP::Cli;
 
 const my @VALID_PROCESS => qw(allele_count ascat finalise);
-my %index_max = ( 'allele_count'   => 2,
+my %index_max = ( 'allele_count'   => -1,
                   'ascat' => 1,
                   'finalise' => 1);
 const my @VALID_GENDERS => qw(XX XY L);
@@ -59,7 +59,11 @@ const my @VALID_GENDERS => qw(XX XY L);
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);
 
   # start processes here (in correct order obviously), add conditions for skipping based on 'process' option
-  $threads->run(2, 'allele_count', $options) if(!exists $options->{'process'} || $options->{'process'} eq 'allele_count');
+  if(!exists $options->{'process'} || $options->{'process'} eq 'allele_count') {
+    my $jobs = $options->{'lociChrsBySample'};
+    $jobs = $options->{'limit'} if(exists $options->{'limit'} && defined $options->{'limit'});
+    $threads->run($jobs, 'allele_count', $options);
+  }
 
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
@@ -89,6 +93,7 @@ sub setup {
               'p|process=s' => \$opts{'process'},
               'i|index=i' => \$opts{'index'},
               'c|cpus=i' => \$opts{'threads'},
+              'x|limit=i' => \$opts{'limit'},
               'q|minbasequal=i' => \$opts{'minbasequal'},
               's|snp_loci=s' => \$opts{'snp_loci'},
               'sp|snp_pos=s' => \$opts{'snp_pos'},
@@ -147,12 +152,26 @@ sub setup {
 
   delete $opts{'process'} unless(defined $opts{'process'});
   delete $opts{'index'} unless(defined $opts{'index'});
+  delete $opts{'limit'} unless(defined $opts{'limit'});
   $opts{'minbasequal'} = 20 unless(defined $opts{'minbasequal'});
+
+  $opts{'lociChrsBySample'} = scalar Sanger::CGP::Ascat::Implement::snpLociChrs(\%opts) * 2;
 
   if(exists $opts{'process'}) {
     PCAP::Cli::valid_process('process', $opts{'process'}, \@VALID_PROCESS);
     if(exists $opts{'index'}) {
       my $max = $index_max{$opts{'process'}};
+
+      if($max == -1) {
+        # can only be alleleCount
+        if(exists $opts{'limit'}) {
+          $max = $opts{'limit'};
+        }
+        else {
+          $max = $opts{'lociChrsBySample'}
+        }
+      }
+
       PCAP::Cli::opt_requires_opts('index', \%opts, ['process']);
       die "No max has been defined for this process type\n" if($max == 0);
       PCAP::Cli::valid_index_by_factor('index', $opts{'index'}, $max, 1);
@@ -203,8 +222,8 @@ ascat.pl [options]
   Required parameters
 
     -outdir       -o    Folder to output result to.
-    -tumour       -t    Tumour BAM file
-    -normal       -n    Normal BAM file
+    -tumour       -t    Tumour BAM/CRAM file
+    -normal       -n    Normal BAM/CRAM file
     -reference    -r    Reference fasta
     -snp_loci     -s    Snp locus file
     -snp_pos      -sp   Snp position file
@@ -215,6 +234,8 @@ ascat.pl [options]
   Targeted processing (further detail under OPTIONS):
     -process      -p    Only process this step then exit, optionally set -index
     -index        -i    Optionally restrict '-p' to single job
+    -limit        -x    Specifying 2 will balance processing between '-i 1 & 2'
+                        Must be paired with '-p allele_count'
 
   Optional parameters
     -species      -rs   Reference species [BAM HEADER]

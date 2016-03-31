@@ -44,9 +44,11 @@ use PCAP::Bam;
 
 const my $COUNT_READS => q{%s view -c %s %s};
 
-const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0goodnessOfFit 0\n};
+const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
-const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s ';
+const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
+
+const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 
 const my @ASCAT_RESULT_FILES => qw( %s.aberrationreliability.png
                                     %s.ASCATprofile.png
@@ -70,34 +72,47 @@ sub new {
 }
 
 sub allele_count {
-  my ($index, $options) = @_;
-  return 1 if(exists $options->{'index'} && $index != $options->{'index'});
+ my ($index_in, $options) = @_;
+
   my $tmp = $options->{'tmp'};
-  return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), $index);
 
-  my $ac_out = File::Spec->catdir($tmp, 'allele_count');
-  make_path($ac_out) unless(-e $ac_out);
+	# first handle the easy bit, skip if limit not set
+	return 1 if(exists $options->{'index'} && $index_in != $options->{'index'});
 
-  my @inputs = ($options->{'tumour'}, $options->{'normal'});
-  my $iter = 1;
-  for my $input(@inputs) {
-    next if($iter++ != $index); # skip to the relevant input in the list
+  my @seqs = snpLociChrs($options);
+  my $chrCount = scalar @seqs;
+  my @indicies = limited_indices($options, $index_in, $options->{'lociChrsBySample'});
 
-    my $sname = sanitised_sample_from_bam($input);
-    my $alleleCountOut = File::Spec->catfile($ac_out,$sname .'.allct');
+  my $tmp_cover = File::Spec->catdir($tmp, 'allele_count');
+  make_path($tmp_cover) unless(-e $tmp_cover);
+
+  for my $index(@indicies) {
+    my $samp_type = 'tumour';
+    my $seq_idx = $index-1;
+    if($index > $chrCount) {
+      $samp_type = 'normal';
+      $seq_idx = ($index-$chrCount)-1;
+    }
+    next if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), $index);
+
+    my $ac_out = File::Spec->catdir($tmp, 'allele_count');
+    make_path($ac_out) unless(-e $ac_out);
+
+    my $chr = $seqs[$seq_idx-1];
+    my $sname = sanitised_sample_from_bam($options->{$samp_type});
+    my $alleleCountOut = File::Spec->catfile($ac_out,sprintf '%s.%s.allct', $sname, $chr);
 
     my $allc_exe = _which('alleleCounter');
     my $allc_lib = dirname($allc_exe);
 
     my $command = $allc_exe;
-    $command .= sprintf $ALLELE_COUNT_PARA, $input, $alleleCountOut, $options->{'snp_loci'};
+    $command .= sprintf $ALLELE_COUNT_PARA, $options->{$samp_type}, $alleleCountOut, $options->{'snp_loci'}, $chr, $options->{'reference'};
     $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
 
     PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, $index);
 
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), $index);
   }
-  return 1;
 }
 
 sub ascat {
@@ -121,14 +136,15 @@ sub ascat {
   my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
   my $normcount = File::Spec->catfile($ascat_out,$normcountfile);
 
-  unlink $tumcount if -l $tumcount;
-  unlink $normcount if -l $normcount;
+  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
+    merge_counts($options, $tmp, $tum_name, $tumcount);
+    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
+  }
 
-  my $lntc = 'ln -s '.File::Spec->catfile(File::Spec->catdir($tmp, 'allele_count'),$tum_name.'.allct')." $tumcount";
-  my $lnnc =  'ln -s '.File::Spec->catfile(File::Spec->catdir($tmp, 'allele_count'),$norm_name.'.allct')." $normcount";
-
-  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $lntc, 0);
-  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $lnnc, 0);
+  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0)) {
+    merge_counts($options, $tmp, $norm_name, $normcount);
+    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
+  }
 
   my $command = "cd $ascat_out; "._which('Rscript');
 
@@ -193,7 +209,7 @@ sub finalise {
   if($force_complete == 1) {
     my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
     my $fake_csv = "$^X ";
-    $fake_csv .= _which('failed_cn_csv.pl');
+    $fake_csv .= _which('ascatFailedCnCsv.pl');
     $fake_csv .= sprintf ' -r %s -o %s', $options->{'reference'}, $fake_file;
     push @commands, $fake_csv;
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
@@ -205,7 +221,7 @@ sub finalise {
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
   my $command = "$^X ";
-  $command .= _which('CN_to_VCF.pl');
+  $command .= _which('ascatCnToVCF.pl');
   $command .= " -o $new_vcf";
   $command .= " -r $options->{reference}";
   $command .= " -i $cave_cn";
@@ -230,6 +246,26 @@ sub finalise {
   unlink $new_vcf;
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
+}
+
+sub merge_counts {
+  my ($options, $tmp, $sample, $outfile) = @_;
+  my $first = 1;
+  my @chrs = snpLociChrs($options);
+  for my $chr(@chrs) {
+    my $split = File::Spec->catfile($tmp, 'allele_count' ,sprintf '%s.%s.allct', $sample, $chr);
+    my $command;
+    if($first) {
+      $command = "cp $split $outfile";
+      $first = 0;
+    }
+    else {
+      $command = sprintf $GREP_ALLELE_COUNTS, $split, $outfile;
+    }
+    warn "Merging data: $command\n";
+    system($command);
+  }
+  return 1;
 }
 
 sub get_allele_count_file_path {
@@ -257,28 +293,6 @@ sub _which {
   $path = which($prog) unless(-e $path);
   die "Failed to find $prog in PATH or local bin folder" unless(defined $path);
   return $path;
-}
-
-sub OLD_determine_gender {
-  my $options = shift;
-  my $gender = 'XX';
-  my $samtools = _which('samtools');
-  my $command = sprintf $COUNT_READS, $samtools, $options->{'tumour'}, $options->{'locus'};
-  my $tumour_count = `$command`;
-  chomp $tumour_count;
-  $command = sprintf $COUNT_READS, $samtools, $options->{'normal'}, $options->{'locus'};
-  my $normal_count = `$command`;
-  chomp $normal_count;
-  if($normal_count > $GENDER_MIN && $tumour_count > $GENDER_MIN) {
-    $gender = 'XY'; # male
-  }
-  elsif($normal_count <= $GENDER_MIN && $tumour_count <= $GENDER_MIN) {
-    $gender = 'XX'; # female
-  }
-  else {
-    die "Gender guess inconclusive, tum depth: $tumour_count - norm depth: $normal_count\n";
-  }
-  return $gender;
 }
 
 sub determine_gender {
@@ -320,6 +334,39 @@ sub _parse_gender_results {
   }
   close $fh;
   return $gender;
+}
+
+sub snpLociChrs {
+  my $options = shift;
+  my %chr_set;
+  my @chrs;
+  open my $IN, '<', $options->{'snp_loci'};
+  while(my $line = <$IN>) {
+    my ($chr, undef) = split /\t/, $line;
+    unless(exists $chr_set{$chr}) {
+      $chr_set{$chr} = 1;
+      push @chrs, $chr;
+    }
+  }
+  close $IN;
+  return @chrs;
+}
+
+sub limited_indices {
+	my ($options, $index_in, $count) = @_;
+  my @indicies;
+  if(exists $options->{'limit'}) {
+    # main script checks index is not greater than limit or < 1
+	  my $base = $index_in;
+	  while($base <= $count) {
+	    push @indicies, $base;
+	    $base += $options->{'limit'};
+	  }
+	}
+	else {
+	  push @indicies, $index_in;
+	}
+	return @indicies;
 }
 
 

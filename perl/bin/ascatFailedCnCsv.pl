@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-16 Genome Research Ltd.
 #
 # Author: David Jones <cgpit@sanger.ac.uk>
 #
@@ -96,7 +96,7 @@ __END__
 
 =head1 NAME
 
-failed_cn_csv.pl - Generate CopyNumber csv for a failed ASCAT run suitable for caveman, 5/2 (tumour/normal).
+ascatFailedCnCsv.pl - Generate CopyNumber csv for a failed ASCAT run suitable for caveman, 5/2 (tumour/normal).
 
 =head1 SYNOPSIS
 

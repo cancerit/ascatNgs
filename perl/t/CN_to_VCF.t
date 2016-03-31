@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: David Jones <cgpit@sanger.ac.uk>
 #
@@ -32,7 +32,7 @@ use IPC::Open3;
 my $lib_path = "$Bin/../lib";
 my $bin_path = "$Bin/../bin";
 
-my $SCRIPT = "perl $Bin/../bin/CN_to_VCF.pl";
+my $SCRIPT = "perl $Bin/../bin/ascatCnToVCF.pl";
 my $test_data_path = "$Bin/../testData/";
 my $outfile = 'output.vcf';
 
@@ -79,23 +79,23 @@ my $command = $SCRIPT." ";
   $command .= "-ra $ref_ass ";
   $command .= "-r $ref ";
 
-my $EXP_OUT = "##fileformat=VCFv4.1\n".
-                "##fileDate=".Sanger::CGP::Vcf::VcfUtil->get_date()."\n".
-                "##source_".Sanger::CGP::Vcf::VcfUtil->get_date().".1=CN_to_VCF.pl_v".Sanger::CGP::Vcf->VERSION."\n".
-                "##reference=$ref\n".
-                "##contig=<ID=1,assembly=37,length=249250621,species=HUMAN>\n".
-                "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of this structural variant\">\n".
-                "##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">\n".
-                "##ALT=<ID=CNV,Description=\"Copy number variable region\">\n".
-                "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n".
-                "##FORMAT=<ID=TCN,Number=1,Type=Integer,Description=\"Total copy number\">\n".
-                "##FORMAT=<ID=MCN,Number=1,Type=Integer,Description=\"Minor allele copy number\">\n".
-                "##vcfProcessLog_".Sanger::CGP::Vcf::VcfUtil->get_date().".1=<InputVCFSource=<CN_to_VCF.pl>,InputVCFVer=<".Sanger::CGP::Vcf->VERSION.">>\n".
-                "##SAMPLE=<ID=NORMAL,Description=\"$norm_desc\",Accession=$norm_accession,Platform=$norm_platform,Protocol=$norm_protocol,SampleName=TESTNORM,Source=$norm_source,Study=$norm_study>\n".
-                "##SAMPLE=<ID=TUMOUR,Description=\"$mut_desc\",Accession=$mut_accession,Platform=$mut_platform,Protocol=$mut_protocol,SampleName=TESTMUT,Source=$mut_source,Study=$mut_study>\n".
-                "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOUR\n".
-                "22\t10000009\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\tGT:TCN:MCN\t./.:2:1\t./.:3:1\n".
-                "22\t10000024\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\tGT:TCN:MCN\t./.:2:1\t./.:5:2\n";
+my $EXP_OUT = [ "##fileformat=VCFv4.1",
+                "##fileDate=".Sanger::CGP::Vcf::VcfUtil->get_date(),
+                "##source_".Sanger::CGP::Vcf::VcfUtil->get_date().".1=ascatCnToVCF.pl_v".Sanger::CGP::Vcf->VERSION,
+                "##reference=$ref",
+                "##contig=<ID=1,assembly=37,length=249250621,species=HUMAN>",
+                "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of this structural variant\">",
+                "##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">",
+                "##ALT=<ID=CNV,Description=\"Copy number variable region\">",
+                "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+                "##FORMAT=<ID=TCN,Number=1,Type=Integer,Description=\"Total copy number\">",
+                "##FORMAT=<ID=MCN,Number=1,Type=Integer,Description=\"Minor allele copy number\">",
+                "##vcfProcessLog_".Sanger::CGP::Vcf::VcfUtil->get_date().".1=<InputVCFSource=<ascatCnToVCF.pl>,InputVCFVer=<".Sanger::CGP::Vcf->VERSION.">>",
+                "##SAMPLE=<ID=NORMAL,Description=\"$norm_desc\",Accession=$norm_accession,Platform=$norm_platform,Protocol=$norm_protocol,SampleName=TESTNORM,Source=$norm_source,Study=$norm_study>",
+                "##SAMPLE=<ID=TUMOUR,Description=\"$mut_desc\",Accession=$mut_accession,Platform=$mut_platform,Protocol=$mut_protocol,SampleName=TESTMUT,Source=$mut_source,Study=$mut_study>",
+                "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOUR",
+                "22\t10000009\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=62896419\tGT:TCN:MCN\t./.:2:1\t./.:3:1",
+                "22\t10000024\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;END=63111528\tGT:TCN:MCN\t./.:2:1\t./.:5:2"];
 
 
 subtest 'Good segments file test' => sub{
@@ -117,7 +117,7 @@ subtest 'Good segments file test' => sub{
       $result_out .= $_;
     }
   close($FH);
-  is($result_out, $EXP_OUT, 'Compare output results for good segment file');
+  is_deeply(result_to_arrayref($result_out), $EXP_OUT, 'Compare output results for good segment file');
 
   unlink($outfile);
 };
@@ -127,7 +127,7 @@ subtest 'Good segments STDOUT test' => sub{
 
   my $res = `$newcommand`;
 
-  is($res,$EXP_OUT,'Compare output STDOUT results for good segment file');
+  is_deeply(result_to_arrayref($res),$EXP_OUT,'Compare output STDOUT results for good segment file');
 };
 
 subtest 'Good segments STDIN and STDOUT test' => sub {
@@ -135,7 +135,7 @@ subtest 'Good segments STDIN and STDOUT test' => sub {
 
   my $res = `$newcommand`;
 
-  is($res,$EXP_OUT,'Compare output STDOUT results for good segment file');
+  is_deeply(result_to_arrayref($res),$EXP_OUT,'Compare output STDOUT results for good segment file');
 };
 
 subtest 'Bad segments check for error' => sub {
@@ -162,3 +162,8 @@ subtest 'Bad segments check for error' => sub {
 };
 
 done_testing();
+
+sub result_to_arrayref {
+  my @t = split "\n", shift;
+  return \@t;
+}

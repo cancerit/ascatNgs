@@ -46,6 +46,8 @@ const my $COUNT_READS => q{%s view -c %s %s};
 
 const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
+const my $ALLELE_COUNT_GENDER => ' -b %s -o %s -l %s -r %s ';
+
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 
 const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
@@ -309,11 +311,15 @@ sub determine_gender {
     $gender_loci = File::Spec->catfile($gender_path,'GRCh37d5_Y.loci');
   }
 
+  my $idx = 0;
+  $idx = $options->{'index'} if(exists $options->{'index'} && defined $options->{'index'});
+  my $outfile = File::Spec->catfile($options->{'tmp'}, $idx.'.normal_gender.tsv');
+
   my $command = _which('alleleCounter');
-  $command .= sprintf $ALLELE_COUNT_PARA, $options->{'normal'}, File::Spec->catfile($options->{'tmp'}, 'normal_gender.tsv'), $gender_loci;
+  $command .= sprintf $ALLELE_COUNT_GENDER, $options->{'normal'}, $outfile, $gender_loci, $options->{'reference'};
   $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
   system($command);
-  my $norm_gender = _parse_gender_results(File::Spec->catfile($options->{'tmp'}, 'normal_gender.tsv'));
+  my $norm_gender = _parse_gender_results($outfile);
   return $norm_gender;
 }
 

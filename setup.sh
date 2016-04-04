@@ -37,7 +37,7 @@ done_message () {
 get_file () {
 # output, source
   if hash curl 2>/dev/null; then
-    curl --insecure -sS -o $1 -L $2
+    curl -sS -o $1 -L $2
   else
     wget -nv -O $1 $2
   fi

@@ -1,5 +1,4 @@
 bin/ascat.pl
-bin/ascat_version.pl
 bin/ascatCnToVCF.pl
 bin/ascatFailedCnCsv.pl
 bin/utilities/ascatFaiChunk.pl
@@ -25,6 +24,11 @@ docs/pod_html/ascatFailedCnCsv.html
 docs/pod_html/index.html
 docs/pod_html/Sanger/CGP/Ascat.html
 docs/pod_html/utilities/ascatSnpPanelGenerator.html
+docs/reports_html/blib-lib-Sanger-CGP-Ascat-Implement-pm--branch.html
+docs/reports_html/blib-lib-Sanger-CGP-Ascat-Implement-pm--subroutine.html
+docs/reports_html/blib-lib-Sanger-CGP-Ascat-Implement-pm.html
+docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm--subroutine.html
+docs/reports_html/blib-lib-Sanger-CGP-Ascat-pm.html
 docs/reports_html/common.js
 docs/reports_html/cover.14
 docs/reports_html/cover.css
@@ -32,11 +36,6 @@ docs/reports_html/coverage.html
 docs/reports_html/css.js
 docs/reports_html/digests
 docs/reports_html/index.html
-docs/reports_html/lib-Sanger-CGP-Ascat-Implement-pm--branch.html
-docs/reports_html/lib-Sanger-CGP-Ascat-Implement-pm--subroutine.html
-docs/reports_html/lib-Sanger-CGP-Ascat-Implement-pm.html
-docs/reports_html/lib-Sanger-CGP-Ascat-pm--subroutine.html
-docs/reports_html/lib-Sanger-CGP-Ascat-pm.html
 docs/reports_html/standardista-table-sorting.js
 docs/reports_text/coverage.txt
 lib/Sanger/CGP/Ascat.pm

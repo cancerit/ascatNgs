@@ -99,6 +99,7 @@ sub setup {
               'sp|snp_pos=s' => \$opts{'snp_pos'},
               'sg|snp_gc=s' => \$opts{'snp_gc'},
               'g|gender=s' => \$opts{'gender'},
+              'gc|genderChr=s' => \$opts{'genderChr'},
               'l|locus=s' => \$opts{'locus'},
               'r|reference=s' => \$opts{'reference'},
               'rs|species=s' => \$opts{'species'},
@@ -195,7 +196,15 @@ sub setup {
   if(defined $opts{'gender'}){
     pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
     if($opts{'gender'} eq 'L') {
-      $opts{'gender'} = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
+      my ($is_male, $gender_chr) = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
+      $opts{'genderChr'} = $gender_chr;
+      $opts{'genderIsMale'} = $gender_chr;
+      $opts{'gender'} = $is_male eq 'N' ? 'XX' : 'XY';
+    }
+    else {
+      pod2usage(-message => 'genderChr must be set when gender is XX/XY', -verbose => 1) if(!defined $opts{'genderChr'});
+      pod2usage(-message => 'gender must be XX, XY or L', -verbose => 1)if($opts{'gender'} !~ m/^X[XY]$/);
+      $opts{'genderIsMale'} = $opts{'gender'} eq 'XX' ? 'N' : 'Y';
     }
   } else {
     pod2usage(-message => 'gender not set', -verbose => 1);
@@ -229,7 +238,8 @@ ascat.pl [options]
     -snp_pos      -sp   Snp position file
     -snp_gc       -sg   Snp GC correction file
     -gender       -g    Sample gender (XX, XY, L)
-                          When 'L' define '-l'
+                          For XX/XY see '-gc'
+                          When 'L' see '-l'
 
   Targeted processing (further detail under OPTIONS):
     -process      -p    Only process this step then exit, optionally set -index
@@ -238,6 +248,7 @@ ascat.pl [options]
                         Must be paired with '-p allele_count'
 
   Optional parameters
+    -genderChr    -gc   Specify the 'Male' sex chromosome: X,chrX...
     -species      -rs   Reference species [BAM HEADER]
     -assembly     -ra   Reference assembly [BAM HEADER]
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)

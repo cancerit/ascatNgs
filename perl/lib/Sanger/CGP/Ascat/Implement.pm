@@ -33,6 +33,7 @@ use File::Which qw(which);
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile);
 use File::Copy qw(copy move);
+use Capture::Tiny qw(capture);
 use FindBin qw($Bin);
 
 use File::ShareDir qw(module_dir);
@@ -46,7 +47,7 @@ const my $COUNT_READS => q{%s view -c %s %s};
 
 const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
-const my $ALLELE_COUNT_GENDER => ' -b %s -o %s -l %s -r %s ';
+const my $ALLELE_COUNT_GENDER => ' -b %s -l %s -r %s -g ';
 
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 
@@ -217,8 +218,17 @@ sub finalise {
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
     open my $STAT, '>', $samp_stat_file;
     print $STAT $FAILED_SAMPLE_STATISTICS or die "Failed to write line to $samp_stat_file";
+    print $STAT "GenderChr $options->{genderChr}\n";
+    print $STAT "GenderChrFound $options->{genderIsMale}\n";
     close $STAT;
     $cave_cn = $fake_file;
+  }
+  else {
+    my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
+    open my $STAT, '>>', $samp_stat_file;
+    print $STAT "GenderChr $options->{genderChr}\n";
+    print $STAT "GenderChrFound $options->{genderIsMale}\n";
+    close $STAT;
   }
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
@@ -315,31 +325,14 @@ sub determine_gender {
   $idx = $options->{'index'} if(exists $options->{'index'} && defined $options->{'index'});
   my $outfile = File::Spec->catfile($options->{'tmp'}, $idx.'.normal_gender.tsv');
 
-  my $command = _which('alleleCounter');
-  $command .= sprintf $ALLELE_COUNT_GENDER, $options->{'normal'}, $outfile, $gender_loci, $options->{'reference'};
+  my $command = _which('alleleCounter.pl');
+  $command .= sprintf $ALLELE_COUNT_GENDER, $options->{'normal'}, $gender_loci, $options->{'reference'};
   $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
-  system($command);
-  my $norm_gender = _parse_gender_results($outfile);
-  return $norm_gender;
-}
-
-sub _parse_gender_results {
-  my $file = shift @_;
-  my $gender = 'XX';
-  open my $fh, '<', $file;
-  while(my $line = <$fh>) {
-    next if($line =~ m/^#/);
-    chomp $line;
-    #CHR	POS	Count_A	Count_C	Count_G	Count_T	Good_depth
-    my ($chr, $pos, $a, $c, $g, $t, $depth) = split /\t/, $line;
-    # all we really care about is the depth
-    if($depth > 5) {
-      $gender = 'XY';
-      last; # presence of ANY male loci in normal is sufficient, we shouldn't be using this to check for 'matchedness'
-    }
-  }
-  close $fh;
-  return $gender;
+  my ($stdout, $stderr, $exit) = capture { system($command); };
+  die "Command failed: $command\nERROR: $stderr\n" if($exit);
+  chomp $stdout;
+  my ($gender_chr, $norm_gender) = split /\t/, $stdout;
+  return ($norm_gender, $gender_chr);
 }
 
 sub snpLociChrs {

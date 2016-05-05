@@ -248,7 +248,7 @@ ascat.pl [options]
                         Must be paired with '-p allele_count'
 
   Optional parameters
-    -genderChr    -gc   Specify the 'Male' sex chromosome: X,chrX...
+    -genderChr    -gc   Specify the 'Male' sex chromosome: Y,chrY...
     -species      -rs   Reference species [BAM HEADER]
     -assembly     -ra   Reference assembly [BAM HEADER]
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)

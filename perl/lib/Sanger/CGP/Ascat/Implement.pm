@@ -149,6 +149,8 @@ sub ascat {
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
   }
 
+  my $core_chrs = snpLociChrs($options);
+
   my $command = "cd $ascat_out; "._which('Rscript');
 
   my $mod_path = dirname(abs_path($0)).'/../share';
@@ -166,6 +168,7 @@ sub ascat {
   $command .= ' '.$options->{'normal_name'};
   $command .= ' '.$normcountfile;
   $command .= ' '.$options->{'gender'};
+  $command .= ' '.$core_chrs;
   $command .= ' '.$rdata;
 
   if(defined($options->{'ploidy'}) && defined($options->{'purity'})){
@@ -245,13 +248,12 @@ sub finalise {
   $command .= " -msp $options->{platform} -wsp $options->{platform}" if(defined $options->{'platform'});
 
   my $vcf_gz = $new_vcf.'.gz';
-  my $bgzip = _which('bgzip');
-  $bgzip .= sprintf ' -c %s > %s', $new_vcf, $vcf_gz;
+  my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $new_vcf, $new_vcf, _which('bgzip'), $vcf_gz;
 
   my $tabix = _which('tabix');
   $tabix .= sprintf ' -p vcf %s', $vcf_gz;
 
-  push @commands, $command, $bgzip, $tabix;
+  push @commands, $command, $sort_gz, $tabix;
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 

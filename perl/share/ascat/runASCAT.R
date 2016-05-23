@@ -35,17 +35,20 @@ if(length(args)==0){
 	normal_sample = args[6]
 	normal_count_file = args[7]
 	gender = args[8]
-  rdat_out = args[9]
-  purity = as.numeric(args[10])
-  ploidy = as.numeric(args[11])
-  refchrs = args[12]
+	chrCount = as.numeric(args[9])
+  rdat_out = args[10]
+  purity = as.numeric(args[11])
+  ploidy = as.numeric(args[12])
+  refchrs = args[13]
 
-  refCN = ifelse(args[13]=="NA",NA,as.numeric(args[13]))
+  refCN = ifelse(args[14]=="NA",NA,as.numeric(args[14]))
   if(is.na(refchrs)||refchrs=="NA") {
   	refchrs = NA
 	}
 
 }
+
+cat(chrCount,' : chr Count \n')
 
 ## checkpointing: if the RData file exists, only rerun the last step of ASCAT
 if(length(dir(pattern=rdat_out))==0) {
@@ -76,8 +79,9 @@ if(length(dir(pattern=rdat_out))==0) {
     ## This gives every SNP a name (to be able to do GC correction)
     SNPposWithNames = read.table(SNP_pos_with_names,sep="\t",header=T,row.names=1)
 
-    ctrans = 1:24
-    names(ctrans)=c(1:22,"X","Y")
+    ctrans = 1:chrCount
+    nonGenderChrs = chrCount - 2
+    names(ctrans)=c(1:nonGenderChrs,"X","Y")
     newnames = ctrans[as.vector(SNPposWithNames[,1])]*1000000000+SNPposWithNames[,2]
     newnamesSEQ = ctrans[as.vector(SNPpos[,1])]*1000000000+as.numeric(SNPpos[,2])
 
@@ -213,7 +217,8 @@ if(!is.null(ascat.output$nA)) {
   colnames(gCN) = c("Chromosome","Position","Log R", "segmented LogR", "BAF", "segmented BAF", "Copy number", "Minor allele", "Raw copy number")
   gCN[,1]=as.vector(ascat.bc$SNPpos[,1])
   gCN[,2]=ascat.bc$SNPpos[,2]
-  gCN[gCN[,1]=="X",1]=23
+  # X chr is the first one after the main, all includes X+Y
+  gCN[gCN[,1]=="X",1]=chrCount-1
   gCN[,3]=ascat.bc$Tumor_LogR[,1]
   gCN[,4]=ascat.bc$Tumor_LogR_segmented[,1]
   gCN[,5]=ascat.bc$Tumor_BAF[,1]

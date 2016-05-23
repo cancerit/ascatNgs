@@ -91,8 +91,6 @@ while(my $line = <$z>) {
 my $result = evaluate_set($cluster, \%sample_dist);
 print $result if($result);
 
-warn Dumper(\%sample_dist);
-
 sub evaluate_set {
   my ($cluster, $sample_dist) = @_;
   my $retval;

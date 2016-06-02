@@ -48,7 +48,7 @@ if(length(args)==0){
 
 }
 
-cat(chrCount,' : chr Count \n')
+nonGenderChrs = chrCount - 2
 
 ## checkpointing: if the RData file exists, only rerun the last step of ASCAT
 if(length(dir(pattern=rdat_out))==0) {
@@ -80,7 +80,6 @@ if(length(dir(pattern=rdat_out))==0) {
     SNPposWithNames = read.table(SNP_pos_with_names,sep="\t",header=T,row.names=1)
 
     ctrans = 1:chrCount
-    nonGenderChrs = chrCount - 2
     names(ctrans)=c(1:nonGenderChrs,"X","Y")
     newnames = ctrans[as.vector(SNPposWithNames[,1])]*1000000000+SNPposWithNames[,2]
     newnamesSEQ = ctrans[as.vector(SNPpos[,1])]*1000000000+as.numeric(SNPpos[,2])
@@ -130,6 +129,8 @@ if(length(dir(pattern=rdat_out))==0) {
     if(gender=="XY") {
       Tumor_LogR[SNPpos[,1]=="X",1] = Tumor_LogR[SNPpos[,1]=="X",1]-1
       Germline_LogR[SNPpos[,1]=="X",1] = Germline_LogR[SNPpos[,1]=="X",1]-1
+      Tumor_LogR[SNPpos[,1]=="Y",1] = Tumor_LogR[SNPpos[,1]=="Y",1]-1
+      Germline_LogR[SNPpos[,1]=="Y",1] = Germline_LogR[SNPpos[,1]=="Y",1]-1
     }
     Tumor_LogR[,1] = Tumor_LogR[,1] - median(Tumor_LogR[,1],na.rm=T)
 
@@ -151,8 +152,16 @@ if(length(dir(pattern=rdat_out))==0) {
   ## run ASCAT
   source(paste(ascat_lib,"ascat.R",sep="/"))
 
-  ascat.bc = ascat.loadData(paste(tumour_sample,".tumour.LogR.txt",sep=""),paste(tumour_sample,".tumour.BAF.txt",sep=""),
-                            paste(tumour_sample,".normal.LogR.txt",sep=""),paste(tumour_sample,".normal.BAF.txt",sep=""),gender=gender)
+  if(gender=="XY") {
+    ascat.bc = ascat.loadData(paste(tumour_sample,".tumour.LogR.txt",sep=""),paste(tumour_sample,".tumour.BAF.txt",sep=""),
+                              paste(tumour_sample,".normal.LogR.txt",sep=""),paste(tumour_sample,".normal.BAF.txt",sep=""),
+                              gender=gender, chrs=c(1:nonGenderChrs,"X","Y"), sexchromosomes = c("X","Y"))
+  }
+  else {
+    ascat.bc = ascat.loadData(paste(tumour_sample,".tumour.LogR.txt",sep=""),paste(tumour_sample,".tumour.BAF.txt",sep=""),
+                              paste(tumour_sample,".normal.LogR.txt",sep=""),paste(tumour_sample,".normal.BAF.txt",sep=""),
+                              gender=gender, chrs=c(1:nonGenderChrs,"X"), sexchromosomes = c("X"))
+  }
 
   ascat.bc = ascat.GCcorrect(ascat.bc, GCcorrect_file)
 
@@ -161,6 +170,9 @@ if(length(dir(pattern=rdat_out))==0) {
   ascat.bc = ascat.aspcf(ascat.bc)
 
   ascat.plotSegmentedData(ascat.bc)
+
+  # write this NOW, it can be re-written at the end if we get that far
+  save.image(rdat_out)
 
 ## if RData file exists, read it in
 } else {
@@ -217,6 +229,7 @@ if(!is.null(ascat.output$nA)) {
   gCN[,2]=ascat.bc$SNPpos[,2]
   # X chr is the first one after the main, all includes X+Y
   gCN[gCN[,1]=="X",1]=chrCount-1
+  gCN[gCN[,1]=="Y",1]=chrCount
   gCN[,3]=ascat.bc$Tumor_LogR[,1]
   gCN[,4]=ascat.bc$Tumor_LogR_segmented[,1]
   gCN[,5]=ascat.bc$Tumor_BAF[,1]
@@ -248,8 +261,6 @@ if(!is.null(ascat.output$nA)) {
           seg[,4],2,1,
           seg[,5]+seg[,6],
           seg[,6])
-
-  cavemanSegs = rbind(cavemanSegs,c("Y",2649553,59033810,0,0,0,0))
 
   rownames(cavemanSegs) = 1:dim(cavemanSegs)[1]
 

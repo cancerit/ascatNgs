@@ -35,6 +35,7 @@ use File::Temp qw(tempfile);
 use File::Copy qw(copy move);
 use Capture::Tiny qw(capture);
 use FindBin qw($Bin);
+use List::Util qw(first);
 
 use File::ShareDir qw(module_dir);
 
@@ -100,19 +101,25 @@ sub allele_count {
 
     my $ac_out = File::Spec->catdir($tmp, 'allele_count');
     make_path($ac_out) unless(-e $ac_out);
+    my $loci_files = File::Spec->catdir($tmp, 'allele_count', 'loci_files');
+    make_path($loci_files) unless(-e $loci_files);
 
     my $chr = $seqs[$seq_idx-1];
     my $sname = sanitised_sample_from_bam($options->{$samp_type});
     my $alleleCountOut = File::Spec->catfile($ac_out,sprintf '%s.%s.allct', $sname, $chr);
 
+    # first we need a loci file, generate from the gc file:
+    my $loci_file = "$loci_files/$sname.$chr";
+    my $gc_to_loci = qq{cut -f 2,3 $options->{snp_gc} | grep -vP '^Chr\\tPosition' | grep -P '^$chr\t' > $loci_file};
+
     my $allc_exe = _which('alleleCounter');
     my $allc_lib = dirname($allc_exe);
 
     my $command = $allc_exe;
-    $command .= sprintf $ALLELE_COUNT_PARA, $options->{$samp_type}, $alleleCountOut, $options->{'snp_loci'}, $chr, $options->{'reference'};
+    $command .= sprintf $ALLELE_COUNT_PARA, $options->{$samp_type}, $alleleCountOut, $loci_file, $chr, $options->{'reference'};
     $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
 
-    PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, $index);
+    PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), [$gc_to_loci, $command], $index);
 
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), $index);
   }
@@ -149,7 +156,12 @@ sub ascat {
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
   }
 
-  my $core_chrs = snpLociChrs($options);
+  my $snp_pos = File::Spec->catfile($tmp,'SnpPositions.tsv');
+  my $gc_to_snppos = qq{cut -f 1-3 $options->{snp_gc} > $snp_pos};
+
+  my @chr_set = snpLociChrs($options);
+  my $core_chrs = @chr_set;
+  $core_chrs++ unless(first {$_ eq 'Y'  || $_ eq 'chrY'} @chr_set); # incase Y is not in the SNP set
 
   my $command = "cd $ascat_out; "._which('Rscript');
 
@@ -161,7 +173,7 @@ sub ascat {
 
   $command .= " $ascat_exe";
   $command .= " $ascat_path";
-  $command .= ' '.$options->{'snp_pos'};
+  $command .= ' '.$snp_pos;
   $command .= ' '.$options->{'snp_gc'};
   $command .= ' '.$options->{'tumour_name'};
   $command .= ' '.$tumcountfile;
@@ -176,7 +188,7 @@ sub ascat {
     $command .= ' '.$options->{'ploidy'};
   }
 
-  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), $command, 0);
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), [$gc_to_snppos, $command], 0);
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 
@@ -337,13 +349,20 @@ sub determine_gender {
   return ($norm_gender, $gender_chr);
 }
 
+=head
+
+Updated to run from SnpGcPositions as this file is the only one technically needed
+
+=cut
+
 sub snpLociChrs {
   my $options = shift;
   my %chr_set;
   my @chrs;
-  open my $IN, '<', $options->{'snp_loci'};
+  open my $IN, '<', $options->{'snp_gc'};
   while(my $line = <$IN>) {
-    my ($chr, undef) = split /\t/, $line;
+    next if($line =~ m/Chr\tPosition/);
+    my (undef, $chr, undef) = split /\t/, $line;
     unless(exists $chr_set{$chr}) {
       $chr_set{$chr} = 1;
       push @chrs, $chr;

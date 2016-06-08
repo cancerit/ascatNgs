@@ -54,7 +54,8 @@ const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 
 const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 
-const my @ASCAT_RESULT_FILES => qw( %s.aberrationreliability.png
+#%s.aberrationreliability.png
+const my @ASCAT_RESULT_FILES => qw(
                                     %s.ASCATprofile.png
                                     %s.ASPCF.png
                                     %s.germline.png

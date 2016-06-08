@@ -171,9 +171,6 @@ if(length(dir(pattern=rdat_out))==0) {
 
   ascat.plotSegmentedData(ascat.bc)
 
-  # write this NOW, it can be re-written at the end if we get that far
-  save.image(rdat_out)
-
 ## if RData file exists, read it in
 } else {
 
@@ -261,6 +258,11 @@ if(!is.null(ascat.output$nA)) {
           seg[,4],2,1,
           seg[,5]+seg[,6],
           seg[,6])
+
+  # make Major germline 1 when MALE
+  if(gender=="XY") {
+    cavemanSegs[cavemanSegs[,1] %in% c('X','Y'),4] = 1
+  }
 
   rownames(cavemanSegs) = 1:dim(cavemanSegs)[1]
 

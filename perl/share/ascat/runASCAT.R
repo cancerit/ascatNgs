@@ -262,6 +262,7 @@ if(!is.null(ascat.output$nA)) {
   # make Major germline 1 when MALE
   if(gender=="XY") {
     cavemanSegs[cavemanSegs[,1] %in% c('X','Y'),4] = 1
+    cavemanSegs[cavemanSegs[,1] %in% c('X','Y'),5] = 0
   }
 
   rownames(cavemanSegs) = 1:dim(cavemanSegs)[1]

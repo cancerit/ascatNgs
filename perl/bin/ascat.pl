@@ -84,6 +84,7 @@ sub setup {
   my %opts;
   pod2usage(-msg  => "\nERROR: Option must be defined.\n", -verbose => 1,  -output => \*STDERR) if(scalar @ARGV == 0);
   $opts{'cmd'} = join " ", $0, @ARGV;
+  warn "Executing: $opts{cmd}\n";
   GetOptions( 'h|help' => \$opts{'h'},
               'm|man' => \$opts{'m'},
               'v|version' => \$opts{'v'},
@@ -95,8 +96,8 @@ sub setup {
               'c|cpus=i' => \$opts{'threads'},
               'x|limit=i' => \$opts{'limit'},
               'q|minbasequal=i' => \$opts{'minbasequal'},
-              's|snp_loci=s' => \$opts{'snp_loci'},
-              'sp|snp_pos=s' => \$opts{'snp_pos'},
+              's|snp_loci=s' => \$opts{'snp_loci'}, # still here so it doesn't break if defined
+              'sp|snp_pos=s' => \$opts{'snp_pos'}, # still here so it doesn't break if defined
               'sg|snp_gc=s' => \$opts{'snp_gc'},
               'g|gender=s' => \$opts{'gender'},
               'gc|genderChr=s' => \$opts{'genderChr'},
@@ -112,8 +113,8 @@ sub setup {
               'nc|noclean' => \$opts{'noclean'},
   ) or pod2usage(2);
 
-  pod2usage(-message => Sanger::CGP::Ascat::license, -verbose => 1) if(defined $opts{'h'});
-  pod2usage(-verbose => 2) if(defined $opts{'m'});
+  pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
+  pod2usage(-verbose => 2, -exitval => 0) if(defined $opts{'m'});
 
   if($opts{'v'}){
     print Sanger::CGP::Ascat->VERSION."\n";
@@ -129,21 +130,32 @@ sub setup {
   for(keys %opts) { $defined++ if(defined $opts{$_}); }
   pod2usage(-msg  => "\nERROR: Options must be defined.\n", -verbose => 1,  -output => \*STDERR) unless($defined);
 
+  for my $item (qw(tumour normal snp_gc reference outdir protocol gender)) {
+    pod2usage(-msg  => "\nERROR: Option '-$item' must be defined.\n", -verbose => 1,  -output => \*STDERR) unless(defined $opts{$item});
+  }
+
   if((defined($opts{'purity'}) && !defined($opts{'ploidy'})) || (!defined($opts{'purity'}) && defined($opts{'ploidy'}))){
     pod2usage(-msg  => "\nERROR: If one of purity/ploidy are defined, both should be defined.\n", -verbose => 1,  -output => \*STDERR);
   }
 
-  for my $item(qw(tumour normal snp_loci snp_pos snp_gc reference outdir locus)) {
+  for my $item(qw(tumour normal snp_gc reference outdir locus)) {
     $opts{$item} = File::Spec->rel2abs( $opts{$item} ) if(defined $opts{$item});
   }
 
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
-  PCAP::Cli::file_for_reading('snp_loci', $opts{'snp_loci'});
-  PCAP::Cli::file_for_reading('snp_pos', $opts{'snp_pos'});
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
+
+  if(defined $opts{'snp_loci'}) {
+    warn qq{NOTE: '-snp_loci' file is no longer required\n};
+    delete $opts{'snp_loci'};
+  }
+  if(defined $opts{'snp_pos'}) {
+    warn qq{NOTE: '-snp_pos' file is no longer required\n};
+    delete $opts{'snp_pos'};
+  }
 
   my $final_logs = File::Spec->catdir($opts{'outdir'}, 'logs');
   if(-e $final_logs) {
@@ -179,7 +191,7 @@ sub setup {
     }
   }
   elsif(exists $opts{'index'}) {
-    die "ERROR: -index cannot be defined without -process\n";
+    pod2usage(-msg  => "\nERROR: -index cannot be defined without -process.\n", -verbose => 1,  -output => \*STDERR);
   }
 
   $opts{'threads'} = 1 unless(defined $opts{'threads'});
@@ -194,7 +206,7 @@ sub setup {
   $opts{'tmp'} = $tmpdir;
 
   if(defined $opts{'gender'}){
-    pod2usage(-message => 'unknown gender value: '.$opts{'gender'}, -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
+    pod2usage(-message => "\nERROR: Unknown gender value: $opts{gender}\n", -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
     if($opts{'gender'} eq 'L') {
       my ($is_male, $gender_chr) = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
       $opts{'genderChr'} = $gender_chr;
@@ -202,12 +214,12 @@ sub setup {
       $opts{'gender'} = $is_male eq 'N' ? 'XX' : 'XY';
     }
     else {
-      pod2usage(-message => 'genderChr must be set when gender is XX/XY', -verbose => 1) if(!defined $opts{'genderChr'});
-      pod2usage(-message => 'gender must be XX, XY or L', -verbose => 1)if($opts{'gender'} !~ m/^X[XY]$/);
+      pod2usage(-message => "\nERROR: genderChr must be set when gender is XX/XY\n", -verbose => 1) if(!defined $opts{'genderChr'});
+      pod2usage(-message => "\nERROR: gender must be XX, XY or L\n", -verbose => 1)if($opts{'gender'} !~ m/^X[XY]$/);
       $opts{'genderIsMale'} = $opts{'gender'} eq 'XX' ? 'N' : 'Y';
     }
   } else {
-    pod2usage(-message => 'gender not set', -verbose => 1);
+    pod2usage(-message => "\nERROR: gender not set\n", -verbose => 1);
   }
 
   return \%opts;
@@ -234,9 +246,8 @@ ascat.pl [options]
     -tumour       -t    Tumour BAM/CRAM file
     -normal       -n    Normal BAM/CRAM file
     -reference    -r    Reference fasta
-    -snp_loci     -s    Snp locus file
-    -snp_pos      -sp   Snp position file
     -snp_gc       -sg   Snp GC correction file
+    -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
     -gender       -g    Sample gender (XX, XY, L)
                           For XX/XY see '-gc'
                           When 'L' see '-l'
@@ -251,7 +262,6 @@ ascat.pl [options]
     -genderChr    -gc   Specify the 'Male' sex chromosome: Y,chrY...
     -species      -rs   Reference species [BAM HEADER]
     -assembly     -ra   Reference assembly [BAM HEADER]
-    -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
     -platform     -pl   Seqeuncing platform [BAM HEADER]
     -minbasequal  -q    Minimum base quality required before allele is used. [20]
     -cpus         -c    Number of cores to use. [1]

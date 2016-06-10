@@ -3,7 +3,7 @@ AscatNGS
 AscatNGS contains the Cancer Genome Projects workflow implementation of the ASCAT copy number
 algorithm for paired end sequencing.
 
-For details of the underlying algorithm please see the [ASCAT](http://heim.ifi.uio.no/bioinf/Projects/ASCAT/) site.
+For details of the underlying algorithm please see the [ASCAT](https://www.crick.ac.uk/peter-van-loo/software/ASCAT) site.  The GitHub repoitory can be found [here](https://github.com/Crick-CancerGenomics/ascat).
 
 ---
 

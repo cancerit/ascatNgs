@@ -55,15 +55,17 @@ const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 
 const my @ASCAT_RESULT_FILES => qw(
-                                    %s.ASCATprofile.png
                                     %s.ASPCF.png
                                     %s.germline.png
-                                    %s.rawprofile.png
                                     %s.sunrise.png
                                     %s.tumour.png
                                     %s.copynumber.caveman.csv
                                     %s.copynumber.txt
                                     %s.samplestatistics.txt
+                                  );
+const my @ASCAT_OPTIONAL_PNG => qw(
+                                    %s.ASCATprofile.png
+                                    %s.rawprofile.png
                                   );
 
 const my $GENDER_MIN => 5;
@@ -207,7 +209,7 @@ sub finalise {
   my $cave_cn;
   my $force_complete = 0;
   my @commands;
-  foreach my $f(@ASCAT_RESULT_FILES){
+  foreach my $f(@ASCAT_RESULT_FILES, @ASCAT_OPTIONAL_PNG){
     my $file = sprintf($f, $tum_name);
     my $from = File::Spec->catfile($ascat_out,$file);
     if(!-e $from) {
@@ -224,6 +226,7 @@ sub finalise {
       $cave_cn = $to if($to =~ m/copynumber.caveman.csv$/);
     }
   }
+
   if($force_complete == 1) {
     my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
     my $fake_csv = "$^X ";
@@ -237,6 +240,19 @@ sub finalise {
     print $STAT "GenderChrFound $options->{genderIsMale}\n";
     close $STAT;
     $cave_cn = $fake_file;
+
+    my $share_path = dirname(abs_path($0)).'/../share';
+    $share_path = module_dir('Sanger::CGP::Ascat::Implement') unless(-e File::Spec->catdir($share_path, 'images'));
+    my $img_path = File::Spec->catdir($share_path, 'images');
+    my $fail_png = File::Spec->catfile($img_path, 'NoSolution.png');
+
+    for my $f(@ASCAT_OPTIONAL_PNG) {
+      my $file = sprintf($f, $tum_name);
+      my $to = File::Spec->catfile($options->{'outdir'},$file);
+      next if(-e $to);
+      copy $fail_png, $to;
+    }
+
   }
   else {
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;

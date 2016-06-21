@@ -55,15 +55,17 @@ const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 
 const my @ASCAT_RESULT_FILES => qw(
-                                    %s.ASCATprofile.png
                                     %s.ASPCF.png
                                     %s.germline.png
-                                    %s.rawprofile.png
                                     %s.sunrise.png
                                     %s.tumour.png
                                     %s.copynumber.caveman.csv
                                     %s.copynumber.txt
                                     %s.samplestatistics.txt
+                                  );
+const my @ASCAT_OPTIONAL_PNG => qw(
+                                    %s.ASCATprofile.png
+                                    %s.rawprofile.png
                                   );
 
 const my $GENDER_MIN => 5;
@@ -156,8 +158,12 @@ sub ascat {
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
   }
 
+  my $clean_snp_gc = File::Spec->catfile($tmp,'SnpGcCorrections.tsv');
+  # need to strip leading chr so ascat can work
+  clean_snp_gc($options->{'snp_gc'}, $clean_snp_gc);
+
   my $snp_pos = File::Spec->catfile($tmp,'SnpPositions.tsv');
-  my $gc_to_snppos = qq{cut -f 1-3 $options->{snp_gc} > $snp_pos};
+  my $gc_to_snppos = qq{cut -f 1-3 $clean_snp_gc > $snp_pos};
 
   my @chr_set = snpLociChrs($options);
   my $core_chrs = @chr_set;
@@ -174,7 +180,7 @@ sub ascat {
   $command .= " $ascat_exe";
   $command .= " $ascat_path";
   $command .= ' '.$snp_pos;
-  $command .= ' '.$options->{'snp_gc'};
+  $command .= ' '.$clean_snp_gc;
   $command .= ' '.$options->{'tumour_name'};
   $command .= ' '.$tumcountfile;
   $command .= ' '.$options->{'normal_name'};
@@ -207,7 +213,7 @@ sub finalise {
   my $cave_cn;
   my $force_complete = 0;
   my @commands;
-  foreach my $f(@ASCAT_RESULT_FILES){
+  foreach my $f(@ASCAT_RESULT_FILES, @ASCAT_OPTIONAL_PNG){
     my $file = sprintf($f, $tum_name);
     my $from = File::Spec->catfile($ascat_out,$file);
     if(!-e $from) {
@@ -224,6 +230,7 @@ sub finalise {
       $cave_cn = $to if($to =~ m/copynumber.caveman.csv$/);
     }
   }
+
   if($force_complete == 1) {
     my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
     my $fake_csv = "$^X ";
@@ -237,6 +244,19 @@ sub finalise {
     print $STAT "GenderChrFound $options->{genderIsMale}\n";
     close $STAT;
     $cave_cn = $fake_file;
+
+    my $share_path = dirname(abs_path($0)).'/../share';
+    $share_path = module_dir('Sanger::CGP::Ascat::Implement') unless(-e File::Spec->catdir($share_path, 'images'));
+    my $img_path = File::Spec->catdir($share_path, 'images');
+    my $fail_png = File::Spec->catfile($img_path, 'NoSolution.png');
+
+    for my $f(@ASCAT_OPTIONAL_PNG) {
+      my $file = sprintf($f, $tum_name);
+      my $to = File::Spec->catfile($options->{'outdir'},$file);
+      next if(-e $to);
+      copy $fail_png, $to;
+    }
+
   }
   else {
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
@@ -274,23 +294,44 @@ sub finalise {
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 }
 
+sub clean_snp_gc {
+  my ($snp_gc, $cleaned) = @_;
+  open my $GC_IN, '<', $snp_gc or die "ERROR: Failed to open $snp_gc\n\t$!\n";
+  open my $GC_OUT,'>', $cleaned or die "ERROR: Failed to create $cleaned\n\t$!\n";
+  while (my $l = <$GC_IN>) {
+    my @F = split /\t/, $l;
+    $F[1] =~ s/^chr//i unless($. == 1);
+    print $GC_OUT join qq{\t}, @F;
+  }
+  close $GC_IN;
+  close $GC_OUT;
+}
+
 sub merge_counts {
   my ($options, $tmp, $sample, $outfile) = @_;
-  my $first = 1;
   my @chrs = snpLociChrs($options);
+
+  open my $OFH, '>', $outfile or die "ERROR: Failed to create $outfile\n\t$!\n";
+
+  my $first = 1;
   for my $chr(@chrs) {
     my $split = File::Spec->catfile($tmp, 'allele_count' ,sprintf '%s.%s.allct', $sample, $chr);
-    my $command;
-    if($first) {
-      $command = "cp $split $outfile";
-      $first = 0;
+    open my $SF, '<', $split or die "ERROR: Failed to open $split\n\t$!\n";
+    while(my $l = <$SF>) {
+      if($l =~ m/^#/) {
+        if($first == 1) {
+          print $OFH $l;
+          $first = 0;
+        }
+        next;
+      }
+      $l =~ s/^chr//i;
+      print $OFH $l;
     }
-    else {
-      $command = sprintf $GREP_ALLELE_COUNTS, $split, $outfile;
-    }
-    warn "Merging data: $command\n";
-    system($command);
+    close $SF;
   }
+
+  close $OFH;
   return 1;
 }
 

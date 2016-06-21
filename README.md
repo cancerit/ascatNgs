@@ -7,6 +7,9 @@ For details of the underlying algorithm please see the [ASCAT](https://www.crick
 
 ---
 
+### ASCAT core algorithm
+The core `ascat.R` script is pulled from the primary ASCAT repository during intallation.  The linked version is currently [`v2.4.3`](https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.4.3).
+
 ###Dependencies/Install
 Please install the following first:
 

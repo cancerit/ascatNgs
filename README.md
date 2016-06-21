@@ -28,6 +28,10 @@ If you are installing each tool (PCAP-code, cgpVcf, alleleCount) to an independe
 
 Please be aware that this software requires the Rscript executable to be pre-installed.
 
+### Reference files
+
+Please see the [wiki](https://github.com/cancerit/ascatNgs/wiki) for how to obtain/generate the `SnpGcCorrections.tsv` file.
+
 ---
 
 ##Creating a release

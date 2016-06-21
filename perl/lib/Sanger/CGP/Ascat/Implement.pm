@@ -158,8 +158,12 @@ sub ascat {
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
   }
 
+  my $clean_snp_gc = File::Spec->catfile($tmp,'SnpGcCorrections.tsv');
+  # need to strip leading chr so ascat can work
+  clean_snp_gc($options->{'snp_gc'}, $clean_snp_gc);
+
   my $snp_pos = File::Spec->catfile($tmp,'SnpPositions.tsv');
-  my $gc_to_snppos = qq{cut -f 1-3 $options->{snp_gc} > $snp_pos};
+  my $gc_to_snppos = qq{cut -f 1-3 $clean_snp_gc > $snp_pos};
 
   my @chr_set = snpLociChrs($options);
   my $core_chrs = @chr_set;
@@ -176,7 +180,7 @@ sub ascat {
   $command .= " $ascat_exe";
   $command .= " $ascat_path";
   $command .= ' '.$snp_pos;
-  $command .= ' '.$options->{'snp_gc'};
+  $command .= ' '.$clean_snp_gc;
   $command .= ' '.$options->{'tumour_name'};
   $command .= ' '.$tumcountfile;
   $command .= ' '.$options->{'normal_name'};
@@ -288,6 +292,19 @@ sub finalise {
   unlink $new_vcf;
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
+}
+
+sub clean_snp_gc {
+  my ($snp_gc, $cleaned) = @_;
+  open my $GC_IN, '<', $snp_gc or die "ERROR: Failed to open $snp_gc\n\t$!\n";
+  open my $GC_OUT,'>', $cleaned or die "ERROR: Failed to create $cleaned\n\t$!\n";
+  while (my $l = <$GC_IN>) {
+    my @F = split /\t/, $l;
+    $F[1] =~ s/^chr//i unless($. == 1);
+    print $GC_OUT join qq{\t}, @F;
+  }
+  close $GC_IN;
+  close $GC_OUT;
 }
 
 sub merge_counts {

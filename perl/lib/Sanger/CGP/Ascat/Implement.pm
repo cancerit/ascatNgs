@@ -292,21 +292,29 @@ sub finalise {
 
 sub merge_counts {
   my ($options, $tmp, $sample, $outfile) = @_;
-  my $first = 1;
   my @chrs = snpLociChrs($options);
+
+  open my $OFH, '>', $outfile or die "ERROR: Failed to create $outfile\n\t$!\n";
+
+  my $first = 1;
   for my $chr(@chrs) {
     my $split = File::Spec->catfile($tmp, 'allele_count' ,sprintf '%s.%s.allct', $sample, $chr);
-    my $command;
-    if($first) {
-      $command = "cp $split $outfile";
-      $first = 0;
+    open my $SF, '<', $split or die "ERROR: Failed to open $split\n\t$!\n";
+    while(my $l = <$SF>) {
+      if($l =~ m/^#/) {
+        if($first == 1) {
+          print $OFH $l;
+          $first = 0;
+        }
+        next;
+      }
+      $l =~ s/^chr//i;
+      print $OFH $l;
     }
-    else {
-      $command = sprintf $GREP_ALLELE_COUNTS, $split, $outfile;
-    }
-    warn "Merging data: $command\n";
-    system($command);
+    close $SF;
   }
+
+  close $OFH;
   return 1;
 }
 

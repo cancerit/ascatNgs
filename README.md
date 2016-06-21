@@ -7,6 +7,9 @@ For details of the underlying algorithm please see the [ASCAT](https://www.crick
 
 ---
 
+### ASCAT core algorithm
+The core `ascat.R` script is pulled from the primary ASCAT repository during intallation.  The linked version is currently [`v2.4.3`](https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.4.3).
+
 ###Dependencies/Install
 Please install the following first:
 
@@ -24,6 +27,10 @@ Once complete please run:
 If you are installing each tool (PCAP-code, cgpVcf, alleleCount) to an independent area you should set the environment variable `CGP_PERLLIBS` to include the relevant perl libraries from those.
 
 Please be aware that this software requires the Rscript executable to be pre-installed.
+
+### Reference files
+
+Please see the [wiki](https://github.com/cancerit/ascatNgs/wiki) for how to obtain/generate the `SnpGcCorrections.tsv` file.
 
 ---
 

@@ -21,6 +21,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ########## LICENCE ##########
 
+# v2.4.3
+ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/6d40e69a2919ddfc1cda870310203c772bf846ce/ASCAT/R/ascat.R"
+
 done_message () {
     if [ $? -eq 0 ]; then
         echo " done."
@@ -151,10 +154,12 @@ $CPANM -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdep
 done_message "" "Failed during installation of core dependencies."
 
 echo -n "Installing ascatNgs ..."
+get_file share/ascat/ascat.R $ASCAT_SRC && \
 perl Makefile.PL INSTALL_BASE=$INST_PATH && \
 make && \
 make test && \
-make install
+make install && \
+rm share/ascat/ascat.R
 done_message "" "ascatNgs install failed."
 
 # cleanup all junk

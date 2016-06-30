@@ -32,7 +32,13 @@ WriteMakefile(
   VERSION_FROM  => 'lib/Sanger/CGP/Ascat.pm',
   EXE_FILES     => [qw( bin/ascat.pl
                         bin/ascatCnToVCF.pl
-                        bin/ascatFailedCnCsv.pl)],
+                        bin/ascatFailedCnCsv.pl
+                        bin/utilities/ascatFaiChunk.pl
+                        bin/utilities/ascatSnpPanelFromVcfs.pl
+                        bin/utilities/ascatSnpPanelGcCorrections.pl
+                        bin/utilities/ascatSnpPanelGenerator.pl
+                        bin/utilities/ascatSnpPanelMerge.pl
+                        )],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                      'Bio::DB::HTS' => 1.11,

@@ -46,7 +46,7 @@ use PCAP::Bam;
 
 const my $COUNT_READS => q{%s view -c %s %s};
 
-const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to generate a solution ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
+const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to %s ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
 const my $ALLELE_COUNT_GENDER => ' -b %s -l %s -r %s -g ';
 
@@ -57,7 +57,6 @@ const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 const my @ASCAT_RESULT_FILES => qw(
                                     %s.ASPCF.png
                                     %s.germline.png
-                                    %s.sunrise.png
                                     %s.tumour.png
                                     %s.copynumber.caveman.csv
                                     %s.copynumber.txt
@@ -66,6 +65,7 @@ const my @ASCAT_RESULT_FILES => qw(
 const my @ASCAT_OPTIONAL_PNG => qw(
                                     %s.ASCATprofile.png
                                     %s.rawprofile.png
+                                    %s.sunrise.png
                                   );
 
 const my $GENDER_MIN => 5;
@@ -231,7 +231,14 @@ sub finalise {
     }
   }
 
+  my $cn_txt = File::Spec->catfile($options->{'outdir'}, sprintf('%s.copynumber.txt', $tum_name));
+  my $sunrise = File::Spec->catfile($options->{'outdir'}, sprintf('%s.sunrise.png', $tum_name));
+
   if($force_complete == 1) {
+
+    my $fail_reason = 'generate a solution';
+    $fail_reason = 'determine any purity/ploidy profile' unless (-e $sunrise);
+
     my $fake_file = sprintf '%s/%s.copynumber.caveman.csv', $options->{'outdir'}, $tum_name;
     my $fake_csv = "$^X ";
     $fake_csv .= _which('ascatFailedCnCsv.pl');
@@ -239,7 +246,7 @@ sub finalise {
     push @commands, $fake_csv;
     my $samp_stat_file = sprintf '%s/%s.samplestatistics.txt', $options->{'outdir'}, $tum_name;
     open my $STAT, '>', $samp_stat_file;
-    print $STAT $FAILED_SAMPLE_STATISTICS or die "Failed to write line to $samp_stat_file";
+    printf $STAT $FAILED_SAMPLE_STATISTICS, $fail_reason or die "Failed to write line to $samp_stat_file";
     print $STAT "GenderChr $options->{genderChr}\n";
     print $STAT "GenderChrFound $options->{genderIsMale}\n";
     close $STAT;
@@ -248,13 +255,24 @@ sub finalise {
     my $share_path = dirname(abs_path($0)).'/../share';
     $share_path = module_dir('Sanger::CGP::Ascat::Implement') unless(-e File::Spec->catdir($share_path, 'images'));
     my $img_path = File::Spec->catdir($share_path, 'images');
-    my $fail_png = File::Spec->catfile($img_path, 'NoSolution.png');
 
     for my $f(@ASCAT_OPTIONAL_PNG) {
       my $file = sprintf($f, $tum_name);
       my $to = File::Spec->catfile($options->{'outdir'},$file);
       next if(-e $to);
-      copy $fail_png, $to;
+      if($f eq '%s.sunrise.png') {
+        copy(File::Spec->catfile($img_path, 'NoSunrise.png'), $to);
+      }
+      else {
+        copy(File::Spec->catfile($img_path, 'NoSolution.png'), $to);
+      }
+    }
+
+    unless(-e $cn_txt) {
+      open my $CN, '>', $cn_txt;
+      print $CN join "\t", (q{}, 'Chromosome','Position','Log R', 'segmented LogR', 'BAF', 'segmented BAF', 'Copy number', 'Minor allele', 'Raw copy number');
+      print "\n";
+      close $CN;
     }
 
   }
@@ -265,6 +283,7 @@ sub finalise {
     print $STAT "GenderChrFound $options->{genderIsMale}\n";
     close $STAT;
   }
+
   my $new_vcf = $cave_cn;
   $new_vcf =~ s/\.csv$/\.vcf/;
   my $command = "$^X ";
@@ -287,15 +306,12 @@ sub finalise {
 
   push @commands, $command, $sort_gz, $tabix;
 
-  my $cn_txt = sprintf '%s.copynumber.txt', $tum_name;
-  if(-e $cn_txt) {
-    my $cn_txt_gz = qq{gzip -c $cn_txt > $cn_txt.gz};
-    push @commands, $cn_txt_gz;
-  }
+  my $cn_txt_gz = qq{gzip -c $cn_txt > $cn_txt.gz};
+  push @commands, $cn_txt_gz;
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 
-  unlink $new_vcf;
+  unlink $new_vcf, $cn_txt;
 
   PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 0);
 }

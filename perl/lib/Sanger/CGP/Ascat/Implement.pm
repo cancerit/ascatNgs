@@ -287,6 +287,12 @@ sub finalise {
 
   push @commands, $command, $sort_gz, $tabix;
 
+  my $cn_txt = sprintf '%s.copynumber.txt', $tum_name;
+  if(-e $cn_txt) {
+    my $cn_txt_gz = qq{gzip -c $cn_txt > $cn_txt.gz};
+    push @commands, $cn_txt_gz;
+  }
+
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 
   unlink $new_vcf;

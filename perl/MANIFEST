@@ -45,6 +45,7 @@ MANIFEST			This list of files
 share/ascat/runASCAT.R
 share/gender/GRCh37d5_Y.loci
 share/images/NoSolution.png
+share/images/NoSunrise.png
 t/1_pm_compile.t
 t/2_pl_compile.t
 t/CN_to_VCF.t

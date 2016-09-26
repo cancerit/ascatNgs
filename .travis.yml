@@ -36,10 +36,10 @@ script:
  - cd ../
  - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/cgpVcf.git
  - cd cgpVcf
- - ./setup.sh $HOME/cgpVcf-opt $HOME/PCAP-opt
+ - ./setup.sh $HOME/cgpVcf-opt $HOME/PCAP-opt/lib/perl5
  - cd ../
  - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/alleleCount.git
  - cd alleleCount
- - ./setup.sh $HOME/alleleCount-opt $HOME/cgpVcf-opt:$HOME/PCAP-opt
+ - ./setup.sh $HOME/alleleCount-opt $HOME/cgpVcf-opt/lib/perl5:$HOME/PCAP-opt/lib/perl5
  - cd ../
- - ./setup.sh $HOME/ascatNgs-opt $HOME/alleleCount-opt:$HOME/cgpVcf-opt:$HOME/PCAP-opt
+ - ./setup.sh $HOME/ascatNgs-opt $HOME/alleleCount-opt/lib/perl5:$HOME/cgpVcf-opt/lib/perl5:$HOME/PCAP-opt/lib/perl5

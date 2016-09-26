@@ -97,6 +97,8 @@ else
   export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
 fi
 
+echo $PERL5LIB;
+
 #add bin path for install tests
 export PATH=$INST_PATH/bin:$PATH
 
@@ -113,6 +115,7 @@ CPANM=`which cpanm`
 echo $CPANM
 
 PCAP=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' PCAP`
+echo $PCAP
 if [[ "x$PCAP" == "x" ]] ; then
   echo "PREREQUISITE: Please install PCAP-core before proceeding:"
   echo "  https://github.com/ICGC-TCGA-PanCancer/PCAP-core/releases"

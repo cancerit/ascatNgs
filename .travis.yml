@@ -1,0 +1,45 @@
+notifications:
+  slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
+  email: false
+
+env:
+ - CC=gcc
+
+addons:
+ apt:
+  packages:
+   - build-essential
+   - autoconf
+   - bsdtar
+   - time
+   - curl
+   - libcurl4-openssl-dev
+   - nettle-dev
+   - zlib1g-dev
+   - libncurses5-dev
+   - libpstreams-dev
+   - unzip
+   - libpng12-dev
+   - libexpat1-dev
+
+install: true
+
+language: perl
+
+perl:
+ - "5.22"
+
+script:
+ - git clone --depth 1 --single-branch --branch dev https://github.com/ICGC-TCGA-PanCancer/PCAP-core.git
+ - cd PCAP-core
+ - ./setup.sh $HOME/PCAP-opt
+ - cd ../
+ - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/cgpVcf.git
+ - cd cgpVcf
+ - ./setup.sh $HOME/cgpVcf-opt $HOME/PCAP-opt
+ - cd ../
+ - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/alleleCount.git
+ - cd alleleCount
+ - ./setup.sh $HOME/alleleCount-opt $HOME/cgpVcf-opt:$HOME/PCAP-opt
+ - cd ../
+ - ./setup.sh $HOME/ascatNgs-opt $HOME/alleleCount-opt:$HOME/cgpVcf-opt:$HOME/PCAP-opt

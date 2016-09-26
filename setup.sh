@@ -46,12 +46,19 @@ get_file () {
   fi
 }
 
-if [ "$#" -ne "1" ] ; then
-  echo "Please provide an installation path  such as /opt/ICGC"
+if [[ ($# -ne 1 && $# -ne 2) ]] ; then
+  echo "Please provide an installation path and optionally perl lib paths to allow, e.g."
+  echo "  ./setup.sh /opt/myBundle"
+  echo "OR all elements versioned:"
+  echo "  ./setup.sh /opt/cgpVcf-X.X.X /opt/PCAP-X.X.X/lib/perl:/some/other/lib/perl..."
   exit 0
 fi
 
 INST_PATH=$1
+
+if [[ $# -eq 2 ]] ; then
+  CGP_PERLLIBS=$2
+fi
 
 # get current directory
 INIT_DIR=`pwd`

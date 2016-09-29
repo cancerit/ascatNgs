@@ -92,10 +92,12 @@ PERLROOT=$INST_PATH/lib/perl5
 
 # allows user to knowingly specify other PERL5LIB areas.
 if [ -z ${CGP_PERLLIBS+x} ]; then
-  export PERL5LIB="$PERLROOT"
+  PERL5LIB="$PERLROOT"
 else
-  export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
+  PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
 fi
+
+export PERL5LIB=$PERL5LIB
 
 #add bin path for install tests
 export PATH=$INST_PATH/bin:$PATH

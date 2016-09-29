@@ -5,6 +5,10 @@ algorithm for paired end sequencing.
 
 For details of the underlying algorithm please see the [ASCAT](https://www.crick.ac.uk/peter-van-loo/software/ASCAT) site.  The GitHub repoitory can be found [here](https://github.com/Crick-CancerGenomics/ascat).
 
+| Master | Dev |
+|---|---|
+| [![Master Build Status](https://travis-ci.org/cancerit/ascatNgs.svg?branch=master)](https://travis-ci.org/cancerit/ascatNgs) | [![Dev Build Status](https://travis-ci.org/cancerit/ascatNgs.svg?branch=dev)](https://travis-ci.org/cancerit/ascatNgs) |
+
 ---
 
 ### ASCAT core algorithm

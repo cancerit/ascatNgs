@@ -171,7 +171,8 @@ sub prep_outfile {
   my @raw_samples = $hts->header->text =~ m/\@RG[^\n]*[\t]SM\:([^\t\n]+)/gxms;
   die "ERROR: Input file has no 'SM' field in '\@RG' header lines\n" if(scalar @raw_samples == 0);
 
-  my @uniq_samples = keys { map {$_ => 1} @raw_samples };
+  my %tmp = map {$_ => 1} @raw_samples;
+  my @uniq_samples = keys %tmp;
   die "ERROR: Input file header indicates it contains multiple samples, '\@RG' header tag 'SM' values:\n\t".
         join(q{,},@uniq_samples)."\n" if(scalar @uniq_samples > 1);
 

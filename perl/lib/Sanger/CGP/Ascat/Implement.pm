@@ -310,7 +310,7 @@ sub finalise {
   my $cn_txt_gz = qq{gzip -c $cn_txt > $cn_txt.gz};
   push @commands, $cn_txt_gz;
 
-  unless($options->{'nb'}) {
+  unless($options->{'nobigwig'}) {
     my $aliases = sex_chr_mapping($options->{'snp_gc'});
 
     my $cn_to_bw = "$^X ";

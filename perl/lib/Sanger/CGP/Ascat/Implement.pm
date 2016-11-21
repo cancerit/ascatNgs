@@ -232,6 +232,7 @@ sub finalise {
   }
 
   my $cn_txt = File::Spec->catfile($options->{'outdir'}, sprintf('%s.copynumber.txt', $tum_name));
+  my $bw_stub = File::Spec->catfile($options->{'outdir'}, sprintf('%s.copynumber', $tum_name));
   my $sunrise = File::Spec->catfile($options->{'outdir'}, sprintf('%s.sunrise.png', $tum_name));
 
   if($force_complete == 1) {
@@ -308,6 +309,19 @@ sub finalise {
 
   my $cn_txt_gz = qq{gzip -c $cn_txt > $cn_txt.gz};
   push @commands, $cn_txt_gz;
+
+  unless($options->{'nb'}) {
+    my $aliases = sex_chr_mapping($options->{'snp_gc'});
+
+    my $cn_to_bw = "$^X ";
+    $cn_to_bw .= _which('ascatToBigWig.pl');
+    $cn_to_bw .= " -f $options->{reference}.fai";
+    $cn_to_bw .= " -i $cn_txt.gz";
+    $cn_to_bw .= " -o $bw_stub";
+    $cn_to_bw .= " -a $aliases" if(defined $aliases && length $aliases > 0);
+
+    push @commands, $cn_to_bw;
+  }
 
   PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 
@@ -450,6 +464,25 @@ sub limited_indices {
 	  push @indicies, $index_in;
 	}
 	return @indicies;
+}
+
+sub sex_chr_mapping {
+  my $snp_gc = shift;
+  open my $I, '<', $snp_gc;
+  my $idx = 0;
+  my %chr_map;
+  my @aliases;
+  while (<$I>) {
+    next if($. == 1);
+    my $chr=(split /\t/)[1];
+    unless(exists $chr_map{$chr}) {
+      $chr_map{$chr} = 1;
+      $idx++;
+      next if($chr =~ m/^\d+$/);
+      push @aliases, "$idx:$chr";
+    }
+  }
+  return join ',', @aliases;
 }
 
 

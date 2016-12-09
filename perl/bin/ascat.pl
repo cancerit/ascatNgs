@@ -111,6 +111,7 @@ sub setup {
               'pi|ploidy=s' => \$opts{'ploidy'},
               'f|force' => \$opts{'force'},
               'nc|noclean' => \$opts{'noclean'},
+              'nb|nobigwig' => \$opts{'nobigwig'},
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
@@ -277,6 +278,7 @@ ascat.pl [options]
     -ploidy       -pi   Ploidy (psi) setting for manual setting of sunrise plot location
     -noclean      -nc   Finalise results but don't clean up the tmp directory.
                         - Useful when including a manual check and restarting ascat with new pu and pi params.
+    -nobigwig     -nb   Don't generate BigWig files.
 
   Other
     -help         -h    Brief help message

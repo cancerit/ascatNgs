@@ -100,7 +100,7 @@ ascatFailedCnCsv.pl - Generate CopyNumber csv for a failed ASCAT run suitable fo
 
 =head1 SYNOPSIS
 
-failed_cn_csv.pl [options]
+ascatFailedCnCsv.pl [options]
 
     Required parameters:
       -reference  -r  Path to reference fasta (with corresponding fai)
@@ -142,6 +142,6 @@ Prints the manual page and exits.
 
 =head1 DESCRIPTION
 
-B<failed_cn_csv.pl> generates CopyNumber csv for a failed ASCAT run suitable for caveman, 5/2 (tumour/normal).
+B<ascatFailedCnCsv.pl> generates CopyNumber csv for a failed ASCAT run suitable for caveman, 5/2 (tumour/normal).
 
 =cut

@@ -239,7 +239,7 @@ copy-number analysis pipeline.
 
 ascat.pl [options]
 
-  Please defined as many of the parameters as possible
+  Please define as many of the parameters as possible
 
   Required parameters
 

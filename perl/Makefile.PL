@@ -33,6 +33,7 @@ WriteMakefile(
   EXE_FILES     => [qw( bin/ascat.pl
                         bin/ascatCnToVCF.pl
                         bin/ascatFailedCnCsv.pl
+                        bin/ascatToBigWig.pl
                         bin/utilities/ascatFaiChunk.pl
                         bin/utilities/ascatSnpPanelFromVcfs.pl
                         bin/utilities/ascatSnpPanelGcCorrections.pl

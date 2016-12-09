@@ -84,7 +84,6 @@ sub setup {
   my %opts;
   pod2usage(-msg  => "\nERROR: Option must be defined.\n", -verbose => 1,  -output => \*STDERR) if(scalar @ARGV == 0);
   $opts{'cmd'} = join " ", $0, @ARGV;
-  warn "Executing: $opts{cmd}\n";
   GetOptions( 'h|help' => \$opts{'h'},
               'm|man' => \$opts{'m'},
               'v|version' => \$opts{'v'},
@@ -111,6 +110,7 @@ sub setup {
               'pi|ploidy=s' => \$opts{'ploidy'},
               'f|force' => \$opts{'force'},
               'nc|noclean' => \$opts{'noclean'},
+              'nb|nobigwig' => \$opts{'nobigwig'},
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
@@ -120,6 +120,8 @@ sub setup {
     print Sanger::CGP::Ascat->VERSION."\n";
     exit;
   }
+
+  warn "Executing: $opts{cmd}\n";
 
   if(!defined($opts{'noclean'})){
     $opts{'noclean'} = 0;
@@ -238,7 +240,7 @@ copy-number analysis pipeline.
 
 ascat.pl [options]
 
-  Please defined as many of the parameters as possible
+  Please define as many of the parameters as possible
 
   Required parameters
 
@@ -277,6 +279,7 @@ ascat.pl [options]
     -ploidy       -pi   Ploidy (psi) setting for manual setting of sunrise plot location
     -noclean      -nc   Finalise results but don't clean up the tmp directory.
                         - Useful when including a manual check and restarting ascat with new pu and pi params.
+    -nobigwig     -nb   Don't generate BigWig files.
 
   Other
     -help         -h    Brief help message

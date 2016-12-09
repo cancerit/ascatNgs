@@ -199,7 +199,7 @@ ascatCnToVCF.pl - Take CGP copy number algorithm segment output and convert to V
 
 =head1 SYNOPSIS
 
-CN_to_VCF.pl [options]
+ascatCnToVCF.pl [options]
 
     Required parameters:
       -sample-bam-mut                  -sbm  Mutant sample bam file.
@@ -324,6 +324,6 @@ Prints the manual page and exits.
 
 =head1 DESCRIPTION
 
-B<CN_to_VCF.pl> will attempt convert the input segmented file into VCF copy number format.
+B<ascatCnToVCF.pl> will attempt convert the input segmented file into VCF copy number format.
 
 =cut

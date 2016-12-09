@@ -1,6 +1,7 @@
 bin/ascat.pl
 bin/ascatCnToVCF.pl
 bin/ascatFailedCnCsv.pl
+bin/ascatToBigWig.pl
 bin/utilities/ascatFaiChunk.pl
 bin/utilities/ascatSnpPanelFromVcfs.pl
 bin/utilities/ascatSnpPanelGcCorrections.pl
@@ -21,6 +22,7 @@ docs/pod_html/_whtpurk.css
 docs/pod_html/ascat.html
 docs/pod_html/ascatCnToVCF.html
 docs/pod_html/ascatFailedCnCsv.html
+docs/pod_html/ascatToBigWig.html
 docs/pod_html/index.html
 docs/pod_html/Sanger/CGP/Ascat.html
 docs/pod_html/utilities/ascatSnpPanelGenerator.html

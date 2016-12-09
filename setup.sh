@@ -182,13 +182,4 @@ echo "Please add the following to beginning of PERL5LIB:"
 echo "  $PERLROOT"
 echo
 
-echo "!!! If you have pre-v1.8 installations of ascatNgs you may want to remove the following:";
-echo -e "\t$INST_PATH/bin/CN_to_VCF.pl"
-echo -e "\t$INST_PATH/bin/failed_cn_csv.pl"
-echo "  These have been renamed to the following:";
-echo -e "\t$INST_PATH/bin/ascatCnToVCF.pl"
-echo -e "\t$INST_PATH/bin/ascatFailedCnCsv.pl"
-echo
-
-
 exit 0

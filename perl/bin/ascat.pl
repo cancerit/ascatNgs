@@ -84,7 +84,6 @@ sub setup {
   my %opts;
   pod2usage(-msg  => "\nERROR: Option must be defined.\n", -verbose => 1,  -output => \*STDERR) if(scalar @ARGV == 0);
   $opts{'cmd'} = join " ", $0, @ARGV;
-  warn "Executing: $opts{cmd}\n";
   GetOptions( 'h|help' => \$opts{'h'},
               'm|man' => \$opts{'m'},
               'v|version' => \$opts{'v'},
@@ -121,6 +120,8 @@ sub setup {
     print Sanger::CGP::Ascat->VERSION."\n";
     exit;
   }
+
+  warn "Executing: $opts{cmd}\n";
 
   if(!defined($opts{'noclean'})){
     $opts{'noclean'} = 0;
@@ -239,7 +240,7 @@ copy-number analysis pipeline.
 
 ascat.pl [options]
 
-  Please defined as many of the parameters as possible
+  Please define as many of the parameters as possible
 
   Required parameters
 

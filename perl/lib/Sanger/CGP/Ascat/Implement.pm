@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2017 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -33,7 +33,6 @@ use File::Which qw(which);
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile);
 use File::Copy qw(copy move);
-use Capture::Tiny qw(capture);
 use FindBin qw($Bin);
 use List::Util qw(first);
 
@@ -48,7 +47,7 @@ const my $COUNT_READS => q{%s view -c %s %s};
 
 const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to %s ##\nNormalContamination 0.3\nPloidy ?\nrho 0\npsi 0\ngoodnessOfFit 0\n};
 
-const my $ALLELE_COUNT_GENDER => ' -b %s -l %s -r %s -g ';
+const my $ALLELE_COUNT_GENDER => ' -o %s -b %s -l %s -r %s -g ';
 
 const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
 
@@ -417,12 +416,15 @@ sub determine_gender {
   my $outfile = File::Spec->catfile($options->{'tmp'}, $idx.'.normal_gender.tsv');
 
   my $command = _which('alleleCounter.pl');
-  $command .= sprintf $ALLELE_COUNT_GENDER, $options->{'normal'}, $gender_loci, $options->{'reference'};
+  $command .= sprintf $ALLELE_COUNT_GENDER, $outfile, $options->{'normal'}, $gender_loci, $options->{'reference'};
   $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
-  my ($stdout, $stderr, $exit) = capture { system($command); };
-  die "Command failed: $command\nERROR: $stderr\n" if($exit);
-  chomp $stdout;
-  my ($gender_chr, $norm_gender) = split /\t/, $stdout;
+  system($command);
+  open my $GEND_IN, '<', $outfile;
+  my $gend_line = <$GEND_IN>;
+  close $GEND_IN;
+  chomp $gend_line;
+
+  my ($gender_chr, $norm_gender) = split /\t/, $gend_line;
   return ($norm_gender, $gender_chr);
 }
 

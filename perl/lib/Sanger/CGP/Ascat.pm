@@ -26,12 +26,12 @@ use strict;
 use Const::Fast qw(const);
 use base 'Exporter';
 
-our $VERSION = '4.0.0';
+our $VERSION = '4.0.1';
 our @EXPORT = qw($VERSION);
 
 const my $LICENSE =>
 '##########LICENCE##########
-# Copyright (c) 2014-2016 Genome Research Ltd.
+# Copyright (c) 2014-2017 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #

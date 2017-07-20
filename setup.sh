@@ -135,7 +135,7 @@ else
   if version_gt $AC $EXP_ACV; then
     echo "ALL GOOD"
   else
-    echo "PREREQUISITE: Please install alleleCount version >= $EXP_ACV before proceeding:"
+    echo "PREREQUISITE: Please install alleleCount version >= $EXP_ACV before proceeding (Found version $AC):"
     echo "  https://github.com/cancerit/alleleCount/releases"
     exit 1;
   fi

@@ -49,7 +49,7 @@ const my $FAILED_SAMPLE_STATISTICS => qq{## WARNING ASCAT failed to %s ##\nNorma
 
 const my $ALLELE_COUNT_GENDER => ' -o %s -b %s -l %s -r %s -g ';
 
-const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s ';
+const my $ALLELE_COUNT_PARA => ' -b %s -o %s -l %s -c %s -r %s -d ';
 
 const my $GREP_ALLELE_COUNTS => q{grep -v '^#' %s >> %s};
 

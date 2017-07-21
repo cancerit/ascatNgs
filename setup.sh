@@ -26,7 +26,7 @@ ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/6d40e69a
 EXP_ACV="3.3.0"
 
 version_gt () {
-  test $(printf '%s\n' "$@" | sort -V | head -n 1) -ne "$1";
+  test $(printf '%s\n' $@ | sort -V | head -n 1) == "$1";
 }
 
 done_message () {
@@ -133,7 +133,7 @@ if [[ "x$AC" == "x" ]] ; then
   exit 1;
 else
   if version_gt $AC $EXP_ACV; then
-    echo "ALL GOOD"
+    echo "  alleleCounter version is good ($AC)"
   else
     echo "PREREQUISITE: Please install alleleCount version >= $EXP_ACV before proceeding (Found version $AC):"
     echo "  https://github.com/cancerit/alleleCount/releases"

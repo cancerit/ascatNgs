@@ -23,6 +23,11 @@
 
 # v2.4.3
 ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/6d40e69a2919ddfc1cda870310203c772bf846ce/ASCAT/R/ascat.R"
+EXP_ACV="3.3.0"
+
+version_gt () {
+  test $(printf '%s\n' $@ | sort -V | head -n 1) == "$1";
+}
 
 done_message () {
     if [ $? -eq 0 ]; then
@@ -123,9 +128,17 @@ fi
 
 AC=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Sanger::CGP::AlleleCount`
 if [[ "x$AC" == "x" ]] ; then
-  echo "PREREQUISITE: Please install alleleCount before proceeding:"
+  echo "PREREQUISITE: Please install alleleCount version >= $EXP_ACV before proceeding:"
   echo "  https://github.com/cancerit/alleleCount/releases"
   exit 1;
+else
+  if version_gt $AC $EXP_ACV; then
+    echo "  alleleCounter version is good ($AC)"
+  else
+    echo "PREREQUISITE: Please install alleleCount version >= $EXP_ACV before proceeding (Found version $AC):"
+    echo "  https://github.com/cancerit/alleleCount/releases"
+    exit 1;
+  fi
 fi
 
 VCF=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Sanger::CGP::Vcf`

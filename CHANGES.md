@@ -1,3 +1,6 @@
+### 4.1.0
+* Modified to use new >= 3.3.0 allelecounter code with dense SNP functionality
+
 ### 2.1.2
 * Minor fix to usage typo
 

@@ -26,7 +26,7 @@ ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/6d40e69a
 EXP_ACV="3.3.0"
 
 version_gt () {
-  test $(printf '%s\n' $@ | sort -V | head -n 1) == "$1";
+  test $(printf '%s\n' $@ | sort -V | head -n 1) == "$EXP_ACV";
 }
 
 done_message () {

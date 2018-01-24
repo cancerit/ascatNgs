@@ -1,3 +1,6 @@
+### 4.1.1
+* Fix error in setup.sh testing of alleleCounter version
+
 ### 4.1.0
 * Modified to use new >= 3.3.0 allelecounter code with dense SNP functionality
 

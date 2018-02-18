@@ -1,0 +1,12 @@
+--- ASCAT/R/ascat.R	2017-11-30 17:36:27.000000000 +0000
++++ ascat.R	2018-02-18 18:29:39.000000000 +0000
+@@ -259,7 +259,8 @@
+         flag_nona<-(complete.cases(td_chr) & complete.cases(GC_newlist_chr))
+         
+         #only work with chromosomes that have variance
+-        if(length(td_chr[flag_nona])>0 & var(td_chr[flag_nona])>0){
++        chr_var=var(td_chr[flag_nona])#Will be NA if there is exactly one element.
++        if(length(td_chr[flag_nona])>0 && !is.na(chr_var) && chr_var>0){
+           corr<-cor(GC_newlist_chr[flag_nona,3:ncol(GC_newlist_chr)],td_chr[flag_nona])
+           corr_tot<-cbind(corr_tot,corr)
+           length_tot<-c(length_tot,length(td_chr))

@@ -49,6 +49,7 @@ Please install the following first:
   * `ascatNgs` has other dependancies fulfilled by `PCAP-core`.
 * [cgpVcf v2.0+][cgpvcf-rel]
 * [alleleCount v3.0+][allelecount-rel]
+* [RColorBrewer][rcolorbrewer]
 
 Please see these for any child dependencies.
 
@@ -122,3 +123,4 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 [ascat-release]: https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.5
 [ascatngs-wiki]: https://github.com/cancerit/ascatNgs/wiki
 [ds-cgpwgs-git]: https://github.com/cancerit/dockstore-cgpwgs
+[rcolorbrewer]: https://cran.r-project.org/web/packages/RColorBrewer/index.html

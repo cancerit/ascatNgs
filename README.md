@@ -29,7 +29,7 @@ Contents:
 
 ## ASCAT core algorithm
 
-The core `ascat.R` script is pulled from the primary ASCAT repository during intallation.  The linked version is currently [`v2.4.3`][ascat-release].
+The core `ascat.R` script is pulled from the primary ASCAT repository during intallation.  The linked version is currently [`v2.5`][ascat-release].
 
 ## Docker, Singularity and Dockstore
 
@@ -119,6 +119,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 [pcap-core-rel]: https://github.com/cancerit/PCAP-core/releases
 [ascat-web]: https://www.crick.ac.uk/peter-van-loo/software/ASCAT
 [ascat-gh]: https://github.com/Crick-CancerGenomics/ascat
-[ascat-release]: https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.4.3
+[ascat-release]: https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.5
 [ascatngs-wiki]: https://github.com/cancerit/ascatNgs/wiki
 [ds-cgpwgs-git]: https://github.com/cancerit/dockstore-cgpwgs

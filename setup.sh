@@ -21,7 +21,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ########## LICENCE ##########
 
-# v2.5
+# v2.5 - Update info in README.md if changed
 ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/v2.5/ASCAT/R/ascat.R"
 EXP_ACV="3.3.0"
 

@@ -59,8 +59,12 @@ Once complete please run:
 ./setup.sh /some/install/location
 ```
 
-If you are installing each tool (PCAP-code, cgpVcf, alleleCount) to an independent area you should
-set the environment variable `CGP_PERLLIBS` to include the relevant perl libraries from those.
+If you are installing each tool (`PCAP-code`, `cgpVcf`, `alleleCount`) to an independent area you should
+set the environment variable `CGP_PERLLIBS` to include the relevant perl libraries from those, e.g.
+
+```
+export CGP_PERLLIBS=/pcapInst/libs/perl5:/cgpvcfInst/libs/perl5:...
+```
 
 Please be aware that this software requires the Rscript executable to be pre-installed.
 

@@ -29,7 +29,14 @@ Contents:
 
 ## ASCAT core algorithm
 
-The core `ascat.R` script is pulled from the primary ASCAT repository during intallation.  The linked version is currently [`v2.5`][ascat-release].
+The core `ascat.R` script is pulled from the primary ASCAT repository during installation.  The
+linked version is currently [`v2.5`][ascat-release].
+
+### Minimum sequence depth
+
+The minimum depth that you are likely to get reliable results from is 15x genome coverage.  If you
+have very good quality data with good insert size (little or no overlap of reads) you may be successful
+with 12x.
 
 ## Docker, Singularity and Dockstore
 

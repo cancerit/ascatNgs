@@ -55,7 +55,9 @@ Please install the following first:
 * [PCAP-core v2.0+][pcap-core-rel]
   * `ascatNgs` has other dependancies fulfilled by `PCAP-core`.
 * [cgpVcf v2.0+][cgpvcf-rel]
-* [alleleCount v3.0+][allelecount-rel]
+* alleleCount
+  * [alleleCount v4.0.0+][allelecount-rel] - for fragment based counting (recommended)
+  * [alleleCount v3.0.0 - v3.3.1][allelecount-v3] - for read based counting
 * [RColorBrewer][rcolorbrewer]
 
 Please see these for any child dependencies.
@@ -126,6 +128,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 [travis-develop]: https://travis-ci.org/cancerit/ascatNgs.svg?branch=dev
 
 <!-- refs -->
+[allelecount-v3]: https://github.com/cancerit/alleleCount/releases/tag/v3.3.1
 [allelecount-rel]: https://github.com/cancerit/alleleCount/releases
 [cgpvcf-rel]: https://github.com/cancerit/cgpVcf/releases
 [pcap-core-rel]: https://github.com/cancerit/PCAP-core/releases

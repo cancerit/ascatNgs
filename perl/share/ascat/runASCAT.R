@@ -1,7 +1,7 @@
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
-# Author: Peter Van Loo <cgpit@sanger.ac.uk>
+# Author: Peter Van Loo <cgphelp@sanger.ac.uk>
 #
 # This file is part of AscatNGS.
 #
@@ -289,5 +289,3 @@ rm(refCN)
 save.image(rdat_out)
 
 q(save="no")
-
-

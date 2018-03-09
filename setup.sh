@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ########## LICENCE ##########
-# Copyright (c) 2014-2016 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
-# Author: CancerIT <cgpit@sanger.ac.uk>
+# Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
 # This file is part of AscatNGS.
 #
@@ -21,25 +21,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ########## LICENCE ##########
 
-# v2.4.3
-ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/6d40e69a2919ddfc1cda870310203c772bf846ce/ASCAT/R/ascat.R"
+# Update info in README.md if changed
+ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/v2.5.1/ASCAT/R/ascat.R"
 EXP_ACV="3.3.0"
 
 version_gt () {
   test $(printf '%s\n' $@ | sort -V | head -n 1) == "$EXP_ACV";
-}
-
-done_message () {
-    if [ $? -eq 0 ]; then
-        echo " done."
-        if [ "x$1" != "x" ]; then
-            echo $1
-        fi
-    else
-        echo " failed.  See setup.log file for error messages." $2
-        echo "    Please check INSTALL file for items that should be installed by a package manager"
-        exit 1
-    fi
 }
 
 get_file () {
@@ -67,22 +54,6 @@ fi
 
 # get current directory
 INIT_DIR=`pwd`
-
-# re-initialise log file
-echo > $INIT_DIR/setup.log
-
-# log information about this system
-(
-    echo '============== System information ===='
-    set -x
-    lsb_release -a
-    uname -a
-    sw_vers
-    system_profiler
-    grep MemTotal /proc/meminfo
-    set +x
-    echo; echo
-) >>$INIT_DIR/setup.log 2>&1
 
 set -eu
 
@@ -158,10 +129,8 @@ fi
 perlmods=( "File::ShareDir" "File::ShareDir::Install" )
 
 for i in "${perlmods[@]}" ; do
-  echo -n "Installing build prerequisite $i..."
+  echo "Installing build prerequisite $i..."
   $CPANM -v --mirror http://cpan.metacpan.org -l $INST_PATH $i
-  echo
-  done_message "" "Failed during installation of $i."
 done
 
 cd $INIT_DIR/perl
@@ -173,16 +142,14 @@ if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
 fi
 
 $CPANM -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
-done_message "" "Failed during installation of core dependencies."
 
 echo -n "Installing ascatNgs ..."
-get_file share/ascat/ascat.R $ASCAT_SRC && \
-perl Makefile.PL INSTALL_BASE=$INST_PATH && \
-make && \
-make test && \
-make install && \
+get_file share/ascat/ascat.R $ASCAT_SRC
+perl Makefile.PL INSTALL_BASE=$INST_PATH
+make
+make test
+make install
 rm share/ascat/ascat.R
-done_message "" "ascatNgs install failed."
 
 # cleanup all junk
 rm -rf $SETUP_DIR

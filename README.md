@@ -30,7 +30,7 @@ Contents:
 ## ASCAT core algorithm
 
 The core `ascat.R` script is pulled from the primary ASCAT repository during installation.  The
-linked version is currently [`v2.5`][ascat-release].
+linked version is currently [`v2.5.1`][ascat-release].
 
 ### Minimum sequence depth
 

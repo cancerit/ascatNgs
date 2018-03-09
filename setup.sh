@@ -21,8 +21,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ########## LICENCE ##########
 
-# v2.5 - Update info in README.md if changed
-ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/v2.5/ASCAT/R/ascat.R"
+# Update info in README.md if changed
+ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/v2.5.1/ASCAT/R/ascat.R"
 EXP_ACV="3.3.0"
 
 version_gt () {
@@ -145,7 +145,6 @@ $CPANM -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdep
 
 echo -n "Installing ascatNgs ..."
 get_file share/ascat/ascat.R $ASCAT_SRC
-patch share/ascat/ascat.R ../patches/ascat_singleSnp.patch
 perl Makefile.PL INSTALL_BASE=$INST_PATH
 make
 make test

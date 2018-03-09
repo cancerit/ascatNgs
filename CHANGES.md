@@ -1,10 +1,11 @@
 # Changes
 
-## NEXT
+## 4.2.0
 
 * Upgrade to core R [ASCAT v2.5.1](https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.5)
   * applies patch to handle sparse data on a contig (usually Human Y)
 * Recommend upgrading to [alleleCount v4.0.0+](https://github.com/cancerit/alleleCount/releases)
+  * Switches to fragment based counts instead of read based to prevent double counting.
 
 ## 4.1.1
 

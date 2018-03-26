@@ -1,5 +1,9 @@
 # Changes
 
+## 4.2.1
+
+* Update tabix call to use query_full
+
 ## 4.2.0
 
 * Upgrade to core R [ASCAT v2.5.1](https://github.com/Crick-CancerGenomics/ascat/releases/tag/v2.5)

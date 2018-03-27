@@ -154,11 +154,13 @@ sub get_regions {
   for my $t_range(@top_ranges) {
     my ($c_chr, $c_start, $c_end) = @{$t_range};
     if(defined $exclude) {
-      my $iter = $exclude->query(sprintf "%s:%d-%d", $c_chr, $c_start, $c_end);
-      while(my $record = $iter->next){
-        my ($start0, $end1) = (split /\t/, $record)[1..2];
-        push @refined_regions, [sprintf("%s:%d-%d", $c_chr, $c_start, $start0), $c_chr, $c_start, $start0] unless($start0 == 0);
-        $c_start = $end1;
+      my $iter = $exclude->query_full($c_chr, $c_start, $c_end);
+      if(defined($iter)){
+        while(my $record = $iter->next){
+          my ($start0, $end1) = (split /\t/, $record)[1..2];
+          push @refined_regions, [sprintf("%s:%d-%d", $c_chr, $c_start, $start0), $c_chr, $c_start, $start0] unless($start0 == 0);
+          $c_start = $end1;
+        }
       }
     }
     push @refined_regions, [sprintf("%s:%d-%d", $c_chr, $c_start, $c_end), $c_chr, $c_start, $c_end];

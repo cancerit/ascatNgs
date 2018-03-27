@@ -11,6 +11,10 @@
 * Recommend upgrading to [alleleCount v4.0.0+](https://github.com/cancerit/alleleCount/releases)
   * Switches to fragment based counts instead of read based to prevent double counting.
 
+## 4.1.2
+
+* Updated tabix->query to use tabix->query_full
+
 ## 4.1.1
 
 * Fix error in setup.sh testing of alleleCounter version

@@ -2,48 +2,19 @@ notifications:
   slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
   email: false
 
-env:
- - CC=gcc
+sudo: false
 
-addons:
- apt:
-  packages:
-   - build-essential
-   - autoconf
-   - bsdtar
-   - time
-   - curl
-   - libcurl4-openssl-dev
-   - nettle-dev
-   - zlib1g-dev
-   - libncurses5-dev
-   - libpstreams-dev
-   - unzip
-   - libpng12-dev
-   - libexpat1-dev
-
-install: true
-
-language: perl
-
-perl:
- - "5.22"
+services:
+  - docker
 
 script:
- - git clone --depth 1 --single-branch --branch develop https://github.com/cancerit/cgpBigWig.git
- - cd cgpBigWig
- - ./setup.sh $HOME/PCAP-opt
- - cd ../
- - git clone --depth 1 --single-branch --branch dev https://github.com/ICGC-TCGA-PanCancer/PCAP-core.git
- - cd PCAP-core
- - ./setup.sh $HOME/PCAP-opt
- - cd ../
- - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/cgpVcf.git
- - cd cgpVcf
- - ./setup.sh $HOME/cgpVcf-opt $HOME/PCAP-opt/lib/perl5
- - cd ../
- - git clone --depth 1 --single-branch --branch dev https://github.com/cancerit/alleleCount.git
- - cd alleleCount
- - ./setup.sh $HOME/alleleCount-opt $HOME/cgpVcf-opt/lib/perl5:$HOME/PCAP-opt/lib/perl5
- - cd ../
- - ./setup.sh $HOME/ascatNgs-opt $HOME/alleleCount-opt/lib/perl5:$HOME/cgpVcf-opt/lib/perl5:$HOME/PCAP-opt/lib/perl5
+ - set -e
+ - echo 'Build and check docker image'
+ - docker build -t ascatNgs .
+ - docker images | grep -c ascatNgs
+ - echo 'Verify program(s) from this repo'
+ - docker run -t --rm ascatNgs ascat.pl --version
+ - docker run -t --rm ascatNgs ascatCnToVCF.pl --version
+ - docker run -t --rm ascatNgs ascatFailedCnCsv.pl --version
+ - docker run -t --rm ascatNgs ascatToBigWig.pl --version
+ 

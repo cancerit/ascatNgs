@@ -25,6 +25,7 @@ echo $INST_PATH
 
 # get current directory
 INIT_DIR=`pwd`
+ASCAT_SRC="https://raw.githubusercontent.com/Crick-CancerGenomics/ascat/v2.5.1/ASCAT/R/ascat.R"
 
 CPU=`grep -c ^processor /proc/cpuinfo`
 if [ $? -eq 0 ]; then
@@ -49,12 +50,7 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
 set -u
 
-# Rlibs
-if [ ! -e $SETUP_DIR/Rlib.success ]; then
-  cd $INIT_DIR/Rsupport
-  ./setupR.sh $OPT
-  touch $SETUP_DIR/Rlib.success
-fi
+
 
 #add bin path for install tests
 export PATH="$INST_PATH/bin:$PATH"
@@ -68,11 +64,13 @@ fi
 cpanm --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
 
 echo "Installing ascatngs (perl)..."
+get_file share/ascat/ascat.R $ASCAT_SRC
 cd $INIT_DIR/perl
 perl perl/Makefile.PL INSTALL_BASE=$INST_PATH
 make
 make test
 make install
+rm share/ascat/ascat.R
 
 # cleanup all junk
 rm -rf $SETUP_DIR

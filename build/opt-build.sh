@@ -127,8 +127,9 @@ if [ ! -e $SETUP_DIR/allelecount.success ]; then
   perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
   for i in "${perlmods[@]}" ; do
     cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps $i
+    cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
-  cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH .
+
   cd $SETUP_DIR
   rm -rf distro.* distro/*
   touch $SETUP_DIR/allelecount.success

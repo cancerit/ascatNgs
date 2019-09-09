@@ -97,7 +97,7 @@ libbz2-dev \
 libcurl4-gnutls-dev \
 pkg-config \
 libgd-dev \
-libdb-dev
+libdb-dev \
 libboost-iostreams-dev \
 unattended-upgrades && \
 unattended-upgrade -d -v && \

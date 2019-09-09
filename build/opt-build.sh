@@ -124,7 +124,10 @@ if [ ! -e $SETUP_DIR/allelecount.success ]; then
   rm -rf distro/*
   tar --strip-components 1 -C distro -xzf distro.tar.gz
   cd distro
-  cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps .
+  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
+  for i in "${perlmods[@]}" ; do
+    cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps $i
+  done
   cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH .
   cd $SETUP_DIR
   rm -rf distro.* distro/*

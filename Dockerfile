@@ -32,7 +32,7 @@ RUN apt-get install -yq --no-install-recommends r-base
 RUN apt-get install -yq --no-install-recommends libcurl4-openssl-dev
 RUN apt-get install -yq --no-install-recommends libxml2-dev
 RUN apt-get install -yq --no-install-recommends libgit2-dev
-RUN apt-get install -yq --no-install-recommends liblzma5
+RUN apt-get install -yq --no-install-recommends liblzma-dev
 RUN apt-get install -yq --no-install-recommends libssl-dev
 RUN apt-get install -yq --no-install-recommends libcairo2-dev
 RUN apt-get install -yq --no-install-recommends gfortran
@@ -89,6 +89,7 @@ psmisc \
 time \
 zlib1g \
 liblzma5 \
+liblzma-dev \
 libncurses5 \
 p11-kit \
 exonerate \

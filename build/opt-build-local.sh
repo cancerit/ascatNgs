@@ -73,7 +73,7 @@ cpanm --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . 
 echo "Installing ascatngs (perl)..."
 get_file share/ascat/ascat.R $ASCAT_SRC
 cd $INIT_DIR/perl
-perl perl/Makefile.PL INSTALL_BASE=$INST_PATH
+perl Makefile.PL INSTALL_BASE=$INST_PATH
 make
 make test
 make install

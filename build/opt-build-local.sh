@@ -50,7 +50,14 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
 set -u
 
-
+get_file () {
+# output, source
+  if hash curl 2>/dev/null; then
+    curl -sS -o $1 -L $2
+  else
+    wget -nv -O $1 $2
+  fi
+}
 
 #add bin path for install tests
 export PATH="$INST_PATH/bin:$PATH"

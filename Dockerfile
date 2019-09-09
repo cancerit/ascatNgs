@@ -25,6 +25,7 @@ RUN apt-get install -yq --no-install-recommends make
 RUN apt-get install -yq --no-install-recommends gcc
 RUN apt-get install -yq --no-install-recommends pkg-config
 RUN apt-get install -yq --no-install-recommends zlib1g-dev
+RUN apt-get install -yq --no-install-recommends libbz2-dev
 RUN apt-get install -yq --no-install-recommends unzip
 RUN apt-get install -yq --no-install-recommends libpng12-dev
 RUN apt-get install -yq --no-install-recommends r-base

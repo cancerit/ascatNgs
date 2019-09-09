@@ -93,6 +93,11 @@ exonerate \
 libcairo2 \
 gfortran \
 r-base \
+libbz2-dev \
+libcurl4-gnutls-dev \
+pkg-config \
+libgd-dev \
+libdb-dev
 libboost-iostreams-dev \
 unattended-upgrades && \
 unattended-upgrade -d -v && \

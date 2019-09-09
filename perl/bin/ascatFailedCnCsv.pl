@@ -36,6 +36,7 @@ use Pod::Usage qw(pod2usage);
 
 use Try::Tiny;
 use PCAP::Cli;
+use Sanger::CGP::Ascat;
 
 {
   my $opts = setup();

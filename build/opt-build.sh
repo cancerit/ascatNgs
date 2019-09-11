@@ -118,6 +118,16 @@ if [ ! -e $SETUP_DIR/cgpVcf.success ]; then
   touch $SETUP_DIR/cgpVcf.success
 fi
 
+## allelecounter
+if [ ! -e $SETUP_DIR/allelecounter.success ]; then
+  cd $SETUP_DIR
+  mkdir -p $SETUP_DIR/c/bin
+  make -C c clean
+  make -C c -j$CPU
+  cp $SETUP_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  touch $SETUP_DIR/allelecounter.success
+fi
+
 ## allelecount
 if [ ! -e $SETUP_DIR/allelecount.success ]; then
   curl -sSL --retry 10 https://github.com/cancerit/alleleCount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
@@ -129,7 +139,7 @@ if [ ! -e $SETUP_DIR/allelecount.success ]; then
     cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps $i
     cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
-
+  
   cd $SETUP_DIR
   rm -rf distro.* distro/*
   touch $SETUP_DIR/allelecount.success

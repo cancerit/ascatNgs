@@ -113,7 +113,7 @@ sub allele_count {
     my $loci_file = "$loci_files/$sname.$chr";
     my $gc_to_loci = qq{cut -f 2,3 $options->{snp_gc} | grep -vP '^Chr\\tPosition' | grep -P '^$chr\t' > $loci_file};
 
-    my $allc_exe = _which('alleleCount');
+    my $allc_exe = _which('alleleCounter');
     my $allc_lib = dirname($allc_exe);
 
     my $command = $allc_exe;

@@ -118,16 +118,4 @@ if [ ! -e $SETUP_DIR/cgpVcf.success ]; then
   touch $SETUP_DIR/cgpVcf.success
 fi
 
-## Sanger::CGP::PCAP-core
-if [ ! -e $SETUP_DIR/pcap.success ]; then
-  curl -sSL --retry 10 https://github.com/ICGC-TCGA-PanCancer/PCAP-core/archive/${VER_PCAP}.tar.gz > distro.tar.gz
-  rm -rf distro/*
-  tar --strip-components 1 -C distro -xzf distro.tar.gz
-  cd distro
-  cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps .
-  cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH .
-  cd $SETUP_DIR
-  rm -rf distro.* distro/*
-  touch $SETUP_DIR/pcap.success
-fi
 

@@ -118,18 +118,17 @@ if [ ! -e $SETUP_DIR/cgpVcf.success ]; then
   touch $SETUP_DIR/cgpVcf.success
 fi
 
-## allelecounter
-if [ ! -e $SETUP_DIR/allelecounter.success ]; then
-  cd $SETUP_DIR
-  mkdir -p $SETUP_DIR/c/bin
+### alleleCount
+echo "Building alleleCounter ..."
+if [ ! -e $SETUP_DIR/alleleCount.success ]; then
+  #build the C part
+  cd $INIT_DIR
+  mkdir -p $INIT_DIR/c/bin
   make -C c clean
+  export prefix=$INST_PATH
   make -C c -j$CPU
-  cp $SETUP_DIR/c/bin/alleleCounter $INST_PATH/bin/.
-  touch $SETUP_DIR/allelecounter.success
-fi
-
-## allelecount
-if [ ! -e $SETUP_DIR/allelecount.success ]; then
+  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  #build the perl part
   curl -sSL --retry 10 https://github.com/cancerit/alleleCount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
   rm -rf distro/*
   tar --strip-components 1 -C distro -xzf distro.tar.gz
@@ -142,7 +141,5 @@ if [ ! -e $SETUP_DIR/allelecount.success ]; then
   
   cd $SETUP_DIR
   rm -rf distro.* distro/*
-  touch $SETUP_DIR/allelecount.success
+  touch $SETUP_DIR/alleleCounter.success
 fi
-
-

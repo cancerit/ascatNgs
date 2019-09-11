@@ -127,11 +127,11 @@ if [ ! -e $SETUP_DIR/alleleCount.success ]; then
   cd distro
   
   #build the C part
-  mkdir -p $INIT_DIR/c/bin
-  make -f $INIT_DIR/c/Makefile -C c clean
+  mkdir -p distro/c/bin
+  make -C c clean
   export prefix=$INST_PATH
-  make -f $INIT_DIR/c/Makefile -C c -j$CPU
-  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  make  -C c -j$CPU
+  cp distro/c/bin/alleleCounter $INST_PATH/bin/.
   
   #build the perl part
   perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")

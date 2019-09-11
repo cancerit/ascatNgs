@@ -118,20 +118,4 @@ if [ ! -e $SETUP_DIR/cgpVcf.success ]; then
   touch $SETUP_DIR/cgpVcf.success
 fi
 
-## allelecount
-if [ ! -e $SETUP_DIR/allelecount.success ]; then
-  curl -sSL --retry 10 https://github.com/cancerit/allelecount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
-  rm -rf distro/*
-  tar --strip-components 1 -C distro -xzf distro.tar.gz
-  cd distro
-  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
-  for i in "${perlmods[@]}" ; do
-    cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps $i
-    cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH $i
-  done
-
-  cd $SETUP_DIR
-  rm -rf distro.* distro/*
-  touch $SETUP_DIR/allelecount.success
-fi
 

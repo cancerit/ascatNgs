@@ -120,7 +120,7 @@ fi
 
 ## Sanger::CGP::PCAP-core
 if [ ! -e $SETUP_DIR/pcap.success ]; then
-  curl -sSL --retry 10 https://github.com/cancerit/PCAP-core/archive/${VER_PCAP}.tar.gz > distro.tar.gz
+  curl -sSL --retry 10 https://github.com/ICGC-TCGA-PanCancer/PCAP-core/archive/${VER_PCAP}.tar.gz > distro.tar.gz
   rm -rf distro/*
   tar --strip-components 1 -C distro -xzf distro.tar.gz
   cd distro

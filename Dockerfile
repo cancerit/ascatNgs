@@ -22,6 +22,7 @@ RUN apt-get install -yq --no-install-recommends locales
 RUN apt-get install -yq --no-install-recommends g++
 RUN apt-get install -yq --no-install-recommends make
 RUN apt-get install -yq --no-install-recommends gcc
+RUN apt-get install -yq --no-install-recommends wget
 RUN apt-get install -yq --no-install-recommends pkg-config
 RUN apt-get install -yq --no-install-recommends zlib1g-dev
 RUN apt-get install -yq --no-install-recommends libbz2-dev
@@ -95,6 +96,7 @@ exonerate \
 libcairo2 \
 gfortran \
 r-base \
+wget \
 libbz2-dev \
 libcurl4-gnutls-dev \
 pkg-config \

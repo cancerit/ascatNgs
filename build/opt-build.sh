@@ -126,7 +126,8 @@ if [ ! -e $SETUP_DIR/pcap.success ]; then
   cd distro
   perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent" "Bio::Root::Version~1.006924")
   for i in "${perlmods[@]}" ; do
-    $CPANM --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+    cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+    cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
   cd $SETUP_DIR
   rm -rf distro.* distro/*

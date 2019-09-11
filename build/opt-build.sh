@@ -120,7 +120,7 @@ fi
 
 ## allelecount
 if [ ! -e $SETUP_DIR/allelecount.success ]; then
-  curl -sSL --retry 10 https://github.com/cancerit/allelecount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
+  curl -sSL --retry 10 https://github.com/cancerit/alleleCount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
   rm -rf distro/*
   tar --strip-components 1 -C distro -xzf distro.tar.gz
   cd distro

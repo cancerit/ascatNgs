@@ -55,26 +55,19 @@ curl -sSL https://cpanmin.us/ > $SETUP_DIR/cpanm
 perl $SETUP_DIR/cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH App::cpanminus
 rm -f $SETUP_DIR/cpanm
 
-SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2"
-
-cd $SETUP_DIR
-
-echo "Downloading htslib ..."
-if [ ! -e $SETUP_DIR/htslibGet.success ]; then
-  cd $SETUP_DIR
-  wget $SOURCE_HTSLIB
-  touch $SETUP_DIR/htslibGet.success
-fi
-
-echo "Building htslib ..."
+## HTSLIB (tar.bz2)
 if [ ! -e $SETUP_DIR/htslib.success ]; then
+  rm -rf htslib
   mkdir -p htslib
-  tar --strip-components 1 -C htslib -jxf htslib-${VER_HTSLIB}.tar.bz2
+  curl -sSL --retry 10 https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2 > distro.tar.bz2
+  tar --strip-components 1 -C htslib -jxf distro.tar.bz2
   cd htslib
   ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  make clean
   make -j$CPU
   make install
   cd $SETUP_DIR
+  rm -rf distro.*
   touch $SETUP_DIR/htslib.success
 fi
 

@@ -118,29 +118,22 @@ if [ ! -e $SETUP_DIR/cgpVcf.success ]; then
   touch $SETUP_DIR/cgpVcf.success
 fi
 
-### alleleCount
-echo "Building alleleCounter ..."
+##### alleleCount installation
 if [ ! -e $SETUP_DIR/alleleCount.success ]; then
   curl -sSL --retry 10 https://github.com/cancerit/alleleCount/archive/${VER_ALLELECOUNT}.tar.gz > distro.tar.gz
   rm -rf distro/*
   tar --strip-components 1 -C distro -xzf distro.tar.gz
   cd distro
-  
-  #build the C part
-  mkdir -p distro/c/bin
-  make -C c clean
-  export prefix=$INST_PATH
-  make  -C c -j$CPU
-  cp distro/c/bin/alleleCounter $INST_PATH/bin/.
-  
-  #build the perl part
-  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
-  for i in "${perlmods[@]}" ; do
-    cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps $i
-    cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH $i
-  done
-  
+  if [ ! -e $SETUP_DIR/alleleCount_c.success ]; then
+    make -C c clean
+    make -C c -j$CPU prefix=$INST_PATH HTSLIB=$INST_PATH/lib
+    cp c/bin/alleleCounter $INST_PATH/bin/.
+    touch $SETUP_DIR/alleleCount_c.success
+  fi
+  cd perl
+  cpanm --no-interactive --notest --mirror http://cpan.metacpan.org --notest -l $INST_PATH --installdeps .
+  cpanm -v --no-interactive --mirror http://cpan.metacpan.org -l $INST_PATH .
   cd $SETUP_DIR
   rm -rf distro.* distro/*
-  touch $SETUP_DIR/alleleCounter.success
+  touch $SETUP_DIR/alleleCount.success
 fi

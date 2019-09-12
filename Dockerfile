@@ -34,6 +34,8 @@ RUN apt-get install -yq --no-install-recommends libxml2-dev
 RUN apt-get install -yq --no-install-recommends libgit2-dev
 RUN apt-get install -yq --no-install-recommends liblzma-dev
 RUN apt-get install -yq --no-install-recommends libssl-dev
+RUN apt-get install -yq --no-install-recommends nettle-dev
+RUN apt-get install -yq --no-install-recommends time
 RUN apt-get install -yq --no-install-recommends libcairo2-dev
 RUN apt-get install -yq --no-install-recommends gfortran
 RUN apt-get install -yq --no-install-recommends libblas-dev
@@ -97,6 +99,8 @@ libcairo2 \
 gfortran \
 r-base \
 wget \
+time \
+nettle-dev \
 libbz2-dev \
 libcurl4-gnutls-dev \
 pkg-config \

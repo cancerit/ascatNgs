@@ -66,7 +66,7 @@ perlmods=( "File::ShareDir" "File::ShareDir::Install" )
 
 for i in "${perlmods[@]}" ; do
   echo "Installing build prerequisite $i..."
-  $CPANM -v --mirror http://cpan.metacpan.org -l $INST_PATH $i
+  cpanm -v --mirror http://cpan.metacpan.org -l $INST_PATH $i
 done
 
 cd $INIT_DIR/perl

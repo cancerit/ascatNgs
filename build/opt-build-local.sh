@@ -62,6 +62,13 @@ get_file () {
 #add bin path for install tests
 export PATH="$INST_PATH/bin:$PATH"
 
+perlmods=( "File::ShareDir" "File::ShareDir::Install" )
+
+for i in "${perlmods[@]}" ; do
+  echo "Installing build prerequisite $i..."
+  $CPANM -v --mirror http://cpan.metacpan.org -l $INST_PATH $i
+done
+
 cd $INIT_DIR/perl
 
 echo "Installing Perl prerequisites ..."

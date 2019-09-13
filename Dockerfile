@@ -36,6 +36,8 @@ RUN apt-get install -yq --no-install-recommends liblzma-dev
 RUN apt-get install -yq --no-install-recommends libssl-dev
 RUN apt-get install -yq --no-install-recommends nettle-dev
 RUN apt-get install -yq --no-install-recommends time
+RUN apt-get install -yq --no-install-recommends r-base
+RUN apt-get install -yq --no-install-recommends r-base-dev
 RUN apt-get install -yq --no-install-recommends libcairo2-dev
 RUN apt-get install -yq --no-install-recommends gfortran
 RUN apt-get install -yq --no-install-recommends libblas-dev
@@ -57,6 +59,10 @@ ENV R_LIBS_USER $R_LIBS
 
 # don't work in the default location, it can cause problems
 WORKDIR /tmp/builder
+
+COPY build/rlib-build.R build/
+RUN mkdir -p $R_LIBS_USER
+RUN Rscript build/rlib-build.R $R_LIBS_USER 2>&1 | grep '^\*'
 
 # build tools from other repos
 ADD build/opt-build.sh build/
@@ -106,6 +112,8 @@ libcurl4-gnutls-dev \
 pkg-config \
 libgd-dev \
 libdb-dev \
+r-base\
+r-base-dev\
 libboost-iostreams-dev \
 unattended-upgrades && \
 unattended-upgrade -d -v && \

@@ -36,7 +36,6 @@ RUN apt-get install -yq --no-install-recommends liblzma-dev
 RUN apt-get install -yq --no-install-recommends libssl-dev
 RUN apt-get install -yq --no-install-recommends nettle-dev
 RUN apt-get install -yq --no-install-recommends time
-RUN apt-get install -yq --no-install-recommends r-base
 RUN apt-get install -yq --no-install-recommends r-base-dev
 RUN apt-get install -yq --no-install-recommends libcairo2-dev
 RUN apt-get install -yq --no-install-recommends gfortran
@@ -112,8 +111,7 @@ libcurl4-gnutls-dev \
 pkg-config \
 libgd-dev \
 libdb-dev \
-r-base\
-r-base-dev\
+r-base-dev \
 libboost-iostreams-dev \
 unattended-upgrades && \
 unattended-upgrade -d -v && \

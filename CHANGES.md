@@ -1,5 +1,9 @@
 # Changes
 
+## 4.3.0
+
+* Added a Docker container
+
 ## 4.2.1
 
 * Update tabix call to use query_full

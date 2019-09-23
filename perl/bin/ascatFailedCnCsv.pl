@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014-2018 Genome Research Ltd.
+# Copyright (c) 2014-2019 Genome Research Ltd.
 #
 # Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
@@ -36,6 +36,7 @@ use Pod::Usage qw(pod2usage);
 
 use Try::Tiny;
 use PCAP::Cli;
+use Sanger::CGP::Ascat;
 
 {
   my $opts = setup();

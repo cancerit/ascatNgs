@@ -1,5 +1,11 @@
 # Changes
 
+## 4.3.1
+
+* Correct version in dockerfile
+* Remove development libraries from final build
+  * Drops image size from 1.33GB to ~1GB
+
 ## 4.3.0
 
 * Added a Docker container

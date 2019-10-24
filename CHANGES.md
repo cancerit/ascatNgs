@@ -1,5 +1,10 @@
 # Changes
 
+## 4.3.1
+
+* Correct version in dockerfile
+* Remove development lbraries from final build
+
 ## 4.3.0
 
 * Added a Docker container

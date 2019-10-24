@@ -5,8 +5,8 @@ USER root
 # ALL tool versions used by opt-build.sh
 ENV VER_CGPVCF="v2.2.1"
 ENV VER_VCFTOOLS="0.1.16"
-ENV VER_BIODBHTS="2.10"
-ENV VER_HTSLIB="1.7"
+#ENV VER_BIODBHTS="2.10"
+#ENV VER_HTSLIB="1.7"
 ENV VER_ALLELECOUNT="v4.0.0"
 
 RUN apt-get -yq update
@@ -42,6 +42,7 @@ RUN apt-get install -yq --no-install-recommends gfortran
 RUN apt-get install -yq --no-install-recommends libblas-dev
 RUN apt-get install -yq --no-install-recommends libboost-all-dev
 RUN apt-get install -yq --no-install-recommends libpstreams-dev
+RUN apt-get install -yq --no-install-recommends cpanminus
 
 
 RUN locale-gen en_US.UTF-8
@@ -76,17 +77,16 @@ FROM ubuntu:16.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
-      version="2.2.0" \
+      version="4.3.1" \
       description="Ascat NGS docker"
-      
+
 RUN apt-get -yq update \
 && apt-get install -qy --no-install-recommends lsb-release
 
 RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`/" >> /etc/apt/sources.list \
 && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-&& apt-get -yq update
-
-RUN apt-get install -yq --no-install-recommends \
+&& apt-get -yq update \
+&& apt-get install -yq --no-install-recommends \
 locales \
 curl \
 ca-certificates \
@@ -96,23 +96,13 @@ psmisc \
 time \
 zlib1g \
 liblzma5 \
-liblzma-dev \
 libncurses5 \
 p11-kit \
-exonerate \
 libcairo2 \
 gfortran \
 r-base \
-wget \
 time \
-nettle-dev \
-libbz2-dev \
-libcurl4-gnutls-dev \
-pkg-config \
-libgd-dev \
-libdb-dev \
-r-base-dev \
-libboost-iostreams-dev \
+r-base \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

@@ -36,10 +36,8 @@ use Sanger::CGP::Ascat;
 
 # chr, 0-start, 1-stop, value (use string to leave precision as source)
 const my $BG_FRMT => "%s\t%d\t%d\t%s\n";
-const my $DFLT_ALIAS => '23:X,24:Y';
 
 my $options = setup();
-my $chr_map = chr_lookup($options->{'alias'});
 
 my $z = new IO::Uncompress::Gunzip $options->{'input'}, MultiStream=>1 or die "gunzip failed: $GunzipError\n";
 
@@ -55,7 +53,6 @@ while(my $line = <$z>) {
   next if($line =~ /^\t/);
   chomp $line;
   my (undef, $chr, $pos, $logR, $segLogR, $baf, $segBaf, $total_cn, $minor_cn, $raw_cn) = split /\t/, $line;
-  $chr = $chr_map->{$chr} if(exists $chr_map->{$chr});
 
   if($chr ne $chr_last) {
     if($chr_last ne q{}) {
@@ -116,12 +113,6 @@ printf {$bg_fhs->{'minorCn'}} $BG_FRMT, $chr_last, $start_minor_cn-1, $end_minor
 
 close_output_files($options->{'outpre'}, $bg_fhs);
 convert_bg_to_bw($options->{'outpre'}, $options->{'fai'});
-
-sub chr_lookup {
-  my $alias_lst = shift;
-  my %chr_map = split /[:,]/, $alias_lst;
-  return \%chr_map;
-}
 
 sub convert_bg_to_bw {
   my ($outpre, $chromlst) = @_;
@@ -186,7 +177,7 @@ sub setup {
   PCAP::Cli::file_for_reading('fai', $opts{'fai'});
   pod2usage(-msg  => "\nERROR: '-o' must be defined.\n", -verbose => 1,  -output => \*STDERR) unless(defined $opts{'outpre'});
 
-  $opts{'alias'} = $DFLT_ALIAS unless(defined $opts{'alias'});
+  warn "INFO: -alias option is a no-op as runASCAT.R uses proper chr names now." if(defined $opts{'alias'});
 
   return \%opts;
 }
@@ -212,7 +203,7 @@ ascatToBigWig.pl [options]
                    - *.segBaf.bw
     -fai      -f  Path to chrom list or fai file
                    - a tsv file with first 2 columns chr, chr-length
-    -alias    -a  csv for numeric to chr mapping applied to chr column of input [23:X,24:Y]
+    -alias    -a  csv for numeric to chr mapping applied to chr column of input [deprecated no-op]
 
 
   Other

@@ -187,6 +187,9 @@ sub ascat {
   $command .= ' '.$options->{'gender'};
   $command .= ' '.$core_chrs;
   $command .= ' '.$rdata;
+  my $c_string = "c(%s)";
+  $command .= ' "'.sprintf($c_string,"'".join("','",@chr_set)."'").'"';
+  $command .= ' "'.sprintf($c_string,"'".join("','",map { s/chr//ig; $_; } @chr_set)."'").'"';
 
   if(defined($options->{'ploidy'}) && defined($options->{'purity'})){
     $command .= ' '.$options->{'purity'};

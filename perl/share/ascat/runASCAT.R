@@ -49,7 +49,7 @@ if(length(args)==0){
   chrLookupFromAlg = ref_chr_translate
   names(chrLookupFromAlg) = chr_translate
 
-  refCN = ifelse(args[14]=="NA",NA,as.numeric(args[14]))
+  refCN = ifelse(args[16]=="NA",NA,as.numeric(args[16]))
   if(is.na(refchrs)||refchrs=="NA") {
   	refchrs = NA
 	}

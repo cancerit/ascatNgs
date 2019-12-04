@@ -212,7 +212,7 @@ sub setup {
     if($opts{'gender'} eq 'L') {
       my ($is_male, $gender_chr) = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
       $opts{'genderChr'} = $gender_chr;
-      $opts{'genderIsMale'} = $gender_chr;
+      $opts{'genderIsMale'} = $is_male;
       $opts{'gender'} = $is_male eq 'N' ? 'XX' : 'XY';
     }
     else {

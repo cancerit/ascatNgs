@@ -28,20 +28,28 @@ if(length(args)==0){
   stop("No arguments supplied.")
 } else{
 	ascat_lib = args[1]
-  SNP_pos_with_names = args[2]
-  GCcorrect_file = args[3]
-	tumour_sample = args[4]
-	tumour_count_file = args[5]
-	normal_sample = args[6]
-	normal_count_file = args[7]
-	gender = args[8]
-	chrCount = as.numeric(args[9])
-  rdat_out = args[10]
-  purity = as.numeric(args[11])
-  ploidy = as.numeric(args[12])
-  refchrs = args[13]
+    SNP_pos_with_names = args[2]
+    GCcorrect_file = args[3]
+    tumour_sample = args[4]
+    tumour_count_file = args[5]
+    normal_sample = args[6]
+    normal_count_file = args[7]
+    gender = args[8]
+    chrCount = as.numeric(args[9])
+    rdat_out = args[10]
+    ref_chr_translate = eval(parse(text=args[11]))
+    chr_translate = eval(parse(text=args[12]))
+    purity = as.numeric(args[13])
+    ploidy = as.numeric(args[14])
+    refchrs = args[15]
 
-  refCN = ifelse(args[14]=="NA",NA,as.numeric(args[14]))
+  chrForAlgLookup = chr_translate
+  names(chrForAlgLookup) = ref_chr_translate
+
+  chrLookupFromAlg = ref_chr_translate
+  names(chrLookupFromAlg) = chr_translate
+
+  refCN = ifelse(args[16]=="NA",NA,as.numeric(args[16]))
   if(is.na(refchrs)||refchrs=="NA") {
   	refchrs = NA
 	}
@@ -73,6 +81,7 @@ if(length(dir(pattern=rdat_out))==0) {
     SNPpos = matrix(nrow = dim(normalcounts)[1],ncol = 2)
     rownames(SNPpos) = paste("snp",1:dim(SNPpos)[1],sep="")
     colnames(SNPpos) = c("Chr","Position")
+
     SNPpos[,1] = as.vector(normalcounts[,1])
     SNPpos[,2] = normalcounts[,2]
 
@@ -224,13 +233,12 @@ if(!is.null(ascat.output$nA)) {
   colnames(gCN) = c("Chromosome","Position","Log R", "segmented LogR", "BAF", "segmented BAF", "Copy number", "Minor allele", "Raw copy number")
   gCN[,1]=as.vector(ascat.bc$SNPpos[,1])
   gCN[,2]=ascat.bc$SNPpos[,2]
-  # X chr is the first one after the main, all includes X+Y
-  gCN[gCN[,1]=="X",1]=chrCount-1
-  gCN[gCN[,1]=="Y",1]=chrCount
   gCN[,3]=ascat.bc$Tumor_LogR[,1]
   gCN[,4]=ascat.bc$Tumor_LogR_segmented[,1]
   gCN[,5]=ascat.bc$Tumor_BAF[,1]
   gCN[rownames(ascat.bc$Tumor_BAF_segmented[[1]]),6]=ascat.bc$Tumor_BAF_segmented[[1]][,1]
+  #find replace gCN[,1] with translated colnames
+  gCN[,1] = chrLookupFromAlg[gCN[,1]]
   seg = ascat.output$segments
 
   majorallele = NULL
@@ -264,7 +272,8 @@ if(!is.null(ascat.output$nA)) {
     cavemanSegs[cavemanSegs[,1] %in% c('X','Y'),4] = 1
     cavemanSegs[cavemanSegs[,1] %in% c('X','Y'),5] = 0
   }
-
+  #cavemanSegs[,1] replacement contig names
+  cavemanSegs[,1] = chrLookupFromAlg[cavemanSegs[,1]]
   rownames(cavemanSegs) = 1:dim(cavemanSegs)[1]
 
   write.table(cavemanSegs,paste(tumour_sample,".copynumber.caveman.csv",sep=""),row.names=T,col.names=F,sep=",",quote=F)

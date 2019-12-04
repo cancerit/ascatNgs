@@ -187,6 +187,9 @@ sub ascat {
   $command .= ' '.$options->{'gender'};
   $command .= ' '.$core_chrs;
   $command .= ' '.$rdata;
+  my $c_string = "c(%s)";
+  $command .= ' "'.sprintf($c_string,"'".join("','",@chr_set)."'").'"';
+  $command .= ' "'.sprintf($c_string,"'".join("','",map { s/^chr//ig; $_; } @chr_set)."'").'"';
 
   if(defined($options->{'ploidy'}) && defined($options->{'purity'})){
     $command .= ' '.$options->{'purity'};
@@ -310,14 +313,12 @@ sub finalise {
   push @commands, $cn_txt_gz;
 
   unless($options->{'nobigwig'}) {
-    my $aliases = sex_chr_mapping($options->{'snp_gc'});
 
     my $cn_to_bw = "$^X ";
     $cn_to_bw .= _which('ascatToBigWig.pl');
     $cn_to_bw .= " -f $options->{reference}.fai";
     $cn_to_bw .= " -i $cn_txt.gz";
     $cn_to_bw .= " -o $bw_stub";
-    $cn_to_bw .= " -a $aliases" if(defined $aliases && length $aliases > 0);
 
     push @commands, $cn_to_bw;
   }
@@ -467,25 +468,5 @@ sub limited_indices {
 	}
 	return @indicies;
 }
-
-sub sex_chr_mapping {
-  my $snp_gc = shift;
-  open my $I, '<', $snp_gc;
-  my $idx = 0;
-  my %chr_map;
-  my @aliases;
-  while (<$I>) {
-    next if($. == 1);
-    my $chr=(split /\t/)[1];
-    unless(exists $chr_map{$chr}) {
-      $chr_map{$chr} = 1;
-      $idx++;
-      next if($chr =~ m/^\d+$/);
-      push @aliases, "$idx:$chr";
-    }
-  }
-  return join ',', @aliases;
-}
-
 
 1;

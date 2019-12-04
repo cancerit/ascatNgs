@@ -3,6 +3,7 @@
 ## 4.3.2
 
 * Use lookup tables to translate contig names in case we've stripped out 'chr' in GRCh38
+* Fix error in `*.samplestatistics.txt` - GenderChrFound was not being set to Y/N when found but rather the male contig name.
 
 ## 4.3.1
 

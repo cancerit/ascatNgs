@@ -233,9 +233,6 @@ if(!is.null(ascat.output$nA)) {
   colnames(gCN) = c("Chromosome","Position","Log R", "segmented LogR", "BAF", "segmented BAF", "Copy number", "Minor allele", "Raw copy number")
   gCN[,1]=as.vector(ascat.bc$SNPpos[,1])
   gCN[,2]=ascat.bc$SNPpos[,2]
-  # X chr is the first one after the main, all includes X+Y
-  gCN[gCN[,1]=="X",1]=chrCount-1
-  gCN[gCN[,1]=="Y",1]=chrCount
   gCN[,3]=ascat.bc$Tumor_LogR[,1]
   gCN[,4]=ascat.bc$Tumor_LogR_segmented[,1]
   gCN[,5]=ascat.bc$Tumor_BAF[,1]

@@ -56,6 +56,9 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV R_LIBS $OPT/R-lib
 ENV R_LIBS_USER $R_LIBS
+ENV R_PROFILE_USER $OPT/config/Rprofile
+
+COPY build/Rprofile $OPT/config/Rprofile
 
 # don't work in the default location, it can cause problems
 WORKDIR /tmp/builder
@@ -77,7 +80,7 @@ FROM ubuntu:16.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
-      version="4.3.1" \
+      version="4.3.3" \
       description="Ascat NGS docker"
 
 RUN apt-get -yq update \
@@ -119,6 +122,7 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV R_LIBS $OPT/R-lib
 ENV R_LIBS_USER $R_LIBS
+ENV R_PROFILE_USER $OPT/config/Rprofile
 
 RUN mkdir -p $OPT
 COPY --from=builder $OPT $OPT

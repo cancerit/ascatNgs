@@ -1,5 +1,9 @@
 # Changes
 
+## 4.3.3
+
+* Add Rprofile to fix issues with scientific notation
+
 ## 4.3.2
 
 * Use lookup tables to translate contig names in case we've stripped out 'chr' in GRCh38

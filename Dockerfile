@@ -63,9 +63,9 @@ COPY build/Rprofile $OPT/config/Rprofile
 # don't work in the default location, it can cause problems
 WORKDIR /tmp/builder
 
-COPY build/rlib-build.R build/
+COPY build/libInstall.R build/
 RUN mkdir -p $R_LIBS_USER
-RUN Rscript build/rlib-build.R $R_LIBS_USER 2>&1 | grep '^\*'
+RUN Rscript build/libInstall.R $R_LIBS_USER 2>&1 | grep '^\*'
 
 # build tools from other repos
 ADD build/opt-build.sh build/

@@ -5,8 +5,6 @@ USER root
 # ALL tool versions used by opt-build.sh
 ENV VER_CGPVCF="v2.2.1"
 ENV VER_VCFTOOLS="0.1.16"
-#ENV VER_BIODBHTS="2.10"
-#ENV VER_HTSLIB="1.7"
 ENV VER_ALLELECOUNT="v4.0.0"
 
 RUN apt-get -yq update

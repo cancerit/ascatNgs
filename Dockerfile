@@ -75,7 +75,7 @@ RUN bash build/opt-build.sh $OPT
 COPY . .
 RUN bash build/opt-build-local.sh $OPT
 
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
@@ -83,9 +83,11 @@ LABEL maintainer="cgphelp@sanger.ac.uk" \
       description="Ascat NGS docker"
 
 RUN apt-get -yq update \
-&& apt-get install -qy --no-install-recommends lsb-release
+&& apt-get install -qy --no-install-recommends lsb-release \
+gnupg
 
-RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`/" >> /etc/apt/sources.list \
+ENV DEBIAN_FRONTEND "noninteractive" 
+RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`-cran40/" >> /etc/apt/sources.list \
 && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
 && apt-get -yq update \
 && apt-get install -yq --no-install-recommends \
@@ -104,7 +106,6 @@ libcairo2 \
 gfortran \
 r-base \
 time \
-r-base \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

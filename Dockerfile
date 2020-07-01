@@ -1,4 +1,4 @@
-FROM  quay.io/wtsicgp/dockstore-cgpmap:3.1.4 as builder
+FROM quay.io/wtsicgp/pcap-core:5.1.0 as builder
 
 USER root
 
@@ -10,7 +10,6 @@ ENV VER_ALLELECOUNT="v4.0.0"
 RUN apt-get -yq update
 
 RUN apt-get install -qy --no-install-recommends lsb-release
-RUN apt-get install -qy --no-install-recommends gnupg
 RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`/" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN apt-get -yq update

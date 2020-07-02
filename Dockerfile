@@ -1,11 +1,11 @@
-FROM quay.io/wtsicgp/pcap-core:5.1.0 as builder
+FROM quay.io/wtsicgp/pcap-core:5.2.0 as builder
 
 USER root
 
 # ALL tool versions used by opt-build.sh
 ENV VER_CGPVCF="v2.2.1"
 ENV VER_VCFTOOLS="0.1.16"
-ENV VER_ALLELECOUNT="v4.0.0"
+ENV VER_ALLELECOUNT="4.1.0"
 
 RUN apt-get -yq update
 

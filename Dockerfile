@@ -15,6 +15,7 @@ RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`-cran40/
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN apt-get -yq update
 
+ENV DEBIAN_FRONTEND "noninteractive" 
 # no benefit of combined in builder stage
 RUN apt-get install -yq --no-install-recommends locales
 RUN apt-get install -yq --no-install-recommends g++
@@ -26,7 +27,7 @@ RUN apt-get install -yq --no-install-recommends zlib1g-dev
 RUN apt-get install -yq --no-install-recommends libbz2-dev
 RUN apt-get install -yq --no-install-recommends unzip
 RUN apt-get install -yq --no-install-recommends libpng-dev
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install -yq --no-install-recommends tzdata
+RUN apt-get install -yq --no-install-recommends tzdata
 RUN apt-get install -yq --no-install-recommends r-base
 RUN apt-get install -yq --no-install-recommends libcurl4-openssl-dev
 RUN apt-get install -yq --no-install-recommends libxml2-dev
@@ -79,7 +80,7 @@ FROM ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
-      version="4.3.3" \
+      version="4.3.4" \
       description="Ascat NGS docker"
 
 RUN apt-get -yq update \
@@ -102,10 +103,10 @@ zlib1g \
 liblzma5 \
 libncurses5 \
 p11-kit \
-libcairo2 \
-gfortran \
-r-base \
-time \
+libcurl3-gnutls \
+libcurl4 \
+moreutils \
+google-perftools \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ########## LICENSE ##########
-# Copyright (c) 2016-2020 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
-# Author: Cancer Genome Project cgphelp@sanger.ac.uk
+# Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
 # This file is part of AscatNGS.
 #
@@ -36,7 +36,7 @@
 # need to keep in sync with Dockerfile
 export VER_CGPVCF="v2.2.1"
 export VER_VCFTOOLS="0.1.16"
-export VER_ALLELECOUNT="v4.0.0"
+export VER_ALLELECOUNT="4.1.0"
 
 get_file () {
 # output, source

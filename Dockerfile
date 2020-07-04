@@ -107,6 +107,10 @@ libcurl3-gnutls \
 libcurl4 \
 moreutils \
 google-perftools \
+libcairo2 \
+gfortran \
+r-base \
+time \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

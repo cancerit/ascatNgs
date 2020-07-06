@@ -1,5 +1,10 @@
 # Changes
 
+## 4.3.4
+
+* Eliminated redundant logic from setup script
+* Updated Dockerfile to use PCAP-core 5.2.1 as base (Ubuntu 20.04)
+
 ## 4.3.3
 
 * Add Rprofile to fix issues with scientific notation

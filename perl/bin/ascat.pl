@@ -53,7 +53,6 @@ const my @VALID_GENDERS => qw(XX XY L);
   my $options = setup();
   Sanger::CGP::Ascat::Implement::prepare($options);
   my $threads = PCAP::Threaded->new($options->{'threads'});
-  &PCAP::Threaded::disable_out_err if(exists $options->{'index'});
 
   # register any process that can run in parallel here
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);

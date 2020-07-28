@@ -38,6 +38,8 @@ use Pod::Usage qw(pod2usage);
 use List::Util qw(first);
 use Const::Fast qw(const);
 use File::Copy;
+use File::Which qw(which);
+use FindBin qw($Bin);
 
 use Sanger::CGP::Ascat::Implement;
 
@@ -67,6 +69,15 @@ sub cleanup {
   move(File::Spec->catdir($tmpdir, 'logs'), File::Spec->catdir($options->{'outdir'}, 'logs')) || die $!;
   remove_tree $tmpdir if(-e $tmpdir);
   return 0;
+}
+
+sub _which {
+  my $prog = shift;
+  my $l_bin = $Bin;
+  my $path = File::Spec->catfile($l_bin, $prog);
+  $path = which($prog) unless(-e $path);
+  die "Failed to find $prog in PATH or local bin folder" unless(defined $path);
+  return $path;
 }
 
 sub setup {
@@ -165,6 +176,14 @@ sub merge_allele_counts {
     Sanger::CGP::Ascat::Implement::merge_counts($options, $tmp, $tum_name, $tumcount);
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
   }
+  my @commands = ();
+  my $tumcount_new = $tumcount.'.gz';
+  my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $tumcount, $tumcount, _which('bgzip'), $tumcount_new;
+  push @commands, $sort_gz;
+  my $tabix = sprintf('%s -s1 -b2 -e2  %s',_which('tabix'),$tumcount_new);
+  push @commands, $tabix;
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
+  unlink $tumcount;
 }
 
 __END__

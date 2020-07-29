@@ -371,6 +371,36 @@ sub merge_counts {
   return 1;
 }
 
+sub merge_counts_and_index {
+  my $options = shift;
+
+  my $tmp = $options->{'tmp'};
+  $tmp = abs_path($tmp);
+  return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
+
+  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
+
+  my $ascat_out = File::Spec->catdir($tmp, 'ascatCounts');
+  make_path($ascat_out) unless(-e $ascat_out);
+
+  my $tumcountfile = $tum_name . '.count';
+
+  my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
+
+  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
+    merge_counts($options, $tmp, $tum_name, $tumcount);
+    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
+  }
+  my @commands = ();
+  my $tumcount_new = $tumcount.'.gz';
+  my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $tumcount, $tumcount, _which('bgzip'), $tumcount_new;
+  push @commands, $sort_gz;
+  my $tabix = sprintf('%s -s1 -b2 -e2  %s',_which('tabix'),$tumcount_new);
+  push @commands, $tabix;
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
+  unlink $tumcount;
+}
+
 sub get_allele_count_file_path {
   my ($tmp,$sample_name) = @_;
   return File::Spec->catfile(File::Spec->catdir($tmp, $sample_name),'sample.allele_count');

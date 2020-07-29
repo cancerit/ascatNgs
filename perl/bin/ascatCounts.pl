@@ -47,7 +47,8 @@ use PCAP::Cli;
 
 {
   my $options = setup();
-  Sanger::CGP::Ascat::Implement::prepare($options);
+  $options->{'tumour'} = $options->{'bam'}; #map input file to tumour
+  $options->{'tumour_name'} = (PCAP::Bam::sample_name($options->{'bam'}))[0];
   my $threads = PCAP::Threaded->new($options->{'threads'});
   
   # register any process that can run in parallel here
@@ -58,7 +59,7 @@ use PCAP::Cli;
   $jobs = $options->{'limit'} if(exists $options->{'limit'} && defined $options->{'limit'});
   $threads->run($jobs, 'allele_count', $options);
 
-  merge_allele_counts($options);
+  Sanger::CGP::Ascat::Implement::merge_counts_and_index($options);
   cleanup($options) unless($options->{'noclean'} == 1);
 }
 
@@ -123,10 +124,7 @@ sub setup {
     $opts{$item} = File::Spec->rel2abs( $opts{$item} ) if(defined $opts{$item});
   }
 
-  $opts{'tumour'} = $opts{'bam'}; #need to map bam to tumour to use existing perl modules
-  $opts{'normal'} = $opts{'tumour'}; #need to define normal too
-
-  PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
+  PCAP::Cli::file_for_reading('bam', $opts{'bam'});
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
@@ -155,36 +153,6 @@ sub setup {
   return \%opts;
 }
 
-
-sub merge_allele_counts {
-  my $options = shift;
-
-  my $tmp = $options->{'tmp'};
-  $tmp = abs_path($tmp);
-  return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
-
-  my $tum_name = Sanger::CGP::Ascat::Implement::sanitised_sample_from_bam($options->{'tumour'});
-
-  my $ascat_out = File::Spec->catdir($tmp, 'ascatCounts');
-  make_path($ascat_out) unless(-e $ascat_out);
-
-  my $tumcountfile = $tum_name . '.count';
-
-  my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
-
-  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
-    Sanger::CGP::Ascat::Implement::merge_counts($options, $tmp, $tum_name, $tumcount);
-    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
-  }
-  my @commands = ();
-  my $tumcount_new = $tumcount.'.gz';
-  my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $tumcount, $tumcount, _which('bgzip'), $tumcount_new;
-  push @commands, $sort_gz;
-  my $tabix = sprintf('%s -s1 -b2 -e2  %s',_which('tabix'),$tumcount_new);
-  push @commands, $tabix;
-  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
-  unlink $tumcount;
-}
 
 __END__
 

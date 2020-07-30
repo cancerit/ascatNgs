@@ -106,7 +106,7 @@ sub allele_count {
     make_path($loci_files) unless(-e $loci_files);
 
     my $chr = $seqs[$seq_idx-1];
-    my $sname = sanitised_sample_from_bam($options->{$samp_type});
+    my $sname = $options->{$samp_type.'_name'};
     my $alleleCountOut = File::Spec->catfile($ac_out,sprintf '%s.%s.allct', $sname, $chr);
 
     # first we need a loci file, generate from the gc file:
@@ -133,8 +133,8 @@ sub ascat {
   $tmp = abs_path($tmp);
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
-  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
-  my $norm_name = sanitised_sample_from_bam($options->{'normal'});
+  my $tum_name = $options->{'tumour_name'};
+  my $norm_name = $options->{'normal_name'});
 
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   make_path($ascat_out) unless(-e $ascat_out);
@@ -210,7 +210,7 @@ sub finalise {
 
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
-  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
+  my $tum_name = $options->{'tumour_name'};
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   my $cave_cn;
   my $force_complete = 0;
@@ -378,7 +378,7 @@ sub merge_counts_and_index {
   $tmp = abs_path($tmp);
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
-  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
+  my $tum_name = $options->{'tumour_name'};
 
   my $ascat_out = File::Spec->catdir($tmp, 'ascatCounts');
   make_path($ascat_out) unless(-e $ascat_out);
@@ -414,8 +414,8 @@ sub sanitised_sample_from_bam {
 
 sub prepare {
   my $options = shift;
-  $options->{'tumour_name'} = (PCAP::Bam::sample_name($options->{'tumour'}))[0];
-  $options->{'normal_name'} = (PCAP::Bam::sample_name($options->{'normal'}))[0];
+  $options->{'tumour_name'} = sanitised_sample_from_bam($options->{'tumour'});
+  $options->{'normal_name'} = sanitised_sample_from_bam($options->{'normal'});
   return 1;
 }
 

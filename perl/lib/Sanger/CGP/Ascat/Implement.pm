@@ -134,7 +134,7 @@ sub ascat {
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
   my $tum_name = $options->{'tumour_name'};
-  my $norm_name = $options->{'normal_name'});
+  my $norm_name = $options->{'normal_name'};
 
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   make_path($ascat_out) unless(-e $ascat_out);

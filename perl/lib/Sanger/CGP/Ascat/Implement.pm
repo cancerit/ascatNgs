@@ -147,14 +147,15 @@ sub ascat {
   my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
   my $normcount = File::Spec->catfile($ascat_out,$normcountfile);
 
-  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
-    merge_counts($options, $tmp, $tum_name, $tumcount);
-    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
-  }
-
-  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0)) {
-    merge_counts($options, $tmp, $norm_name, $normcount);
-    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
+  if ( $options->{'counts_input'} == 0 ) {
+    unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
+      merge_counts($options, $tmp, $tum_name, $tumcount);
+      PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
+    }
+    unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0)) {
+      merge_counts($options, $tmp, $norm_name, $normcount);
+      PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
+    }
   }
 
   my $clean_snp_gc = File::Spec->catfile($tmp,'SnpGcCorrections.tsv');
@@ -414,8 +415,14 @@ sub sanitised_sample_from_bam {
 
 sub prepare {
   my $options = shift;
-  $options->{'tumour_name'} = sanitised_sample_from_bam($options->{'tumour'});
-  $options->{'normal_name'} = sanitised_sample_from_bam($options->{'normal'});
+  if ( $options->{'counts_input'} == 0 ) {
+    $options->{'tumour_name'} = sanitised_sample_from_bam($options->{'tumour'});
+    $options->{'normal_name'} = sanitised_sample_from_bam($options->{'normal'});
+  }
+  else {
+    $options->{'tumour_name'} = (split /\./ ,basename( $options->{'tumour'} ) )[0];
+    $options->{'normal_name'} = (split /\./ ,basename( $options->{'normal'} ) )[0];
+  }
   return 1;
 }
 
@@ -497,6 +504,24 @@ sub limited_indices {
 	  push @indicies, $index_in;
 	}
 	return @indicies;
+}
+
+sub deploy_counts {
+  my ($index_in, $options) = @_;
+  my $tmp = abs_path($options->{'tmp'});
+  my $ascat_out = File::Spec->catdir($tmp,'ascat');
+  my @commands;
+  my $tum_name = $options->{'tumour_name'};
+  my $norm_name = $options->{'normal_name'};
+  my $tumcount = File::Spec->catfile($ascat_out,$tum_name . '.count');
+  my $normcount = File::Spec->catfile($ascat_out,$norm_name . '.count');
+  if ($index_in == 1 ){
+    push @commands, sprintf 'zcat %s > %s',$options->{'tumour'}, $tumcount;
+  }
+  if ($index_in == 2 ){
+    push @commands, sprintf 'zcat %s > %s',$options->{'normal'}, $normcount;
+  }
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0); 
 }
 
 1;

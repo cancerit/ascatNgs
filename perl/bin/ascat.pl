@@ -24,6 +24,7 @@
 BEGIN {
   use Cwd qw(abs_path);
   use File::Basename;
+  use File::Path qw(make_path);
   unshift (@INC,dirname(abs_path($0)).'/../lib');
 };
 
@@ -56,14 +57,19 @@ const my @VALID_GENDERS => qw(XX XY L);
 
   # register any process that can run in parallel here
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);
+  $threads->add_function('deploy_counts', \&Sanger::CGP::Ascat::Implement::deploy_counts);
 
   # start processes here (in correct order obviously), add conditions for skipping based on 'process' option
-  if(!exists $options->{'process'} || $options->{'process'} eq 'allele_count') {
+  if( ($options->{'counts_input'} == 0) && (!exists $options->{'process'} || $options->{'process'} eq 'allele_count')) {
     my $jobs = $options->{'lociChrsBySample'};
     $jobs = $options->{'limit'} if(exists $options->{'limit'} && defined $options->{'limit'});
     $threads->run($jobs, 'allele_count', $options);
   }
-
+  if ( $options->{'counts_input'} == 1) {
+    my $ascat_out = File::Spec->catdir(abs_path($options->{'tmp'}),'ascat');
+    make_path($ascat_out) unless(-e $ascat_out);
+    $threads->run(2, 'deploy_counts', $options);    
+  }
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
     Sanger::CGP::Ascat::Implement::finalise($options);
@@ -145,6 +151,14 @@ sub setup {
 
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
+  $opts{'counts_input'} = 0;
+  if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'tumour'} =~ /\.count\.gz$/ ) ) {
+    warn qq{NOTE: using counts inputs, skipping allelecount step\n};
+    $opts{'counts_input'} = 1;
+  }
+  if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'tumour'} =~ /\.count\.gz$/ ) ) {
+    pod2usage(-msg  => "\nERROR: Both tumour and normal need to be count files.\n", -verbose => 1,  -output => \*STDERR);
+  }
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});

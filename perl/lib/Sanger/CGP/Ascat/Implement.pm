@@ -420,8 +420,8 @@ sub prepare {
     $options->{'normal_name'} = sanitised_sample_from_bam($options->{'normal'});
   }
   else {
-    $options->{'tumour_name'} = (split /\./ ,basename( $options->{'tumour'} ) )[0];
-    $options->{'normal_name'} = (split /\./ ,basename( $options->{'normal'} ) )[0];
+    $options->{'tumour_name'} = $options->{'t_name'};
+    $options->{'normal_name'} = $options->{'n_name'};
   }
   return 1;
 }

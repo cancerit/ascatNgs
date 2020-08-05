@@ -116,6 +116,8 @@ sub setup {
               'f|force' => \$opts{'force'},
               'nc|noclean' => \$opts{'noclean'},
               'nb|nobigwig' => \$opts{'nobigwig'},
+              'tn|t_name' => \$opts{'t_name'},
+              'nn|n_name' => \$opts{'n_name'}
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
@@ -152,11 +154,14 @@ sub setup {
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
   $opts{'counts_input'} = 0;
-  if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'tumour'} =~ /\.count\.gz$/ ) ) {
+  if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
     warn qq{NOTE: using counts inputs, skipping allelecount step\n};
+    if ( ( !defined($opts{'t_name'} )) || ( ! defined($opts{'n_name'})) ){
+      pod2usage(-msg  => "\nERROR: Must specify normal & tumour names when using count files as input\n", -verbose => 1,  -output => \*STDERR);  
+    }
     $opts{'counts_input'} = 1;
   }
-  if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'tumour'} =~ /\.count\.gz$/ ) ) {
+  if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
     pod2usage(-msg  => "\nERROR: Both tumour and normal need to be count files.\n", -verbose => 1,  -output => \*STDERR);
   }
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
@@ -258,8 +263,8 @@ ascat.pl [options]
   Required parameters
 
     -outdir       -o    Folder to output result to.
-    -tumour       -t    Tumour BAM/CRAM file
-    -normal       -n    Normal BAM/CRAM file
+    -tumour       -t    Tumour BAM/CRAM/counts file
+    -normal       -n    Normal BAM/CRAM/counts file
     -reference    -r    Reference fasta
     -snp_gc       -sg   Snp GC correction file
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
@@ -293,6 +298,8 @@ ascat.pl [options]
     -noclean      -nc   Finalise results but don't clean up the tmp directory.
                         - Useful when including a manual check and restarting ascat with new pu and pi params.
     -nobigwig     -nb   Don't generate BigWig files.
+    -t_name       -tn   Tumour name to use when using count files as input
+    -n_name       -nn   Noraml name to use when using count files as input
 
   Other
     -help         -h    Brief help message

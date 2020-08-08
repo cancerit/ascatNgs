@@ -163,7 +163,7 @@ copy-number analysis pipeline.
 
 =head1 SYNOPSIS
 
-ascat.pl [options]
+ascatCounts.pl [options]
 
   Please define as many of the parameters as possible
 

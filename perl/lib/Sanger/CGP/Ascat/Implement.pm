@@ -437,6 +437,9 @@ sub _which {
 
 sub determine_gender {
   my $options = shift;
+
+  die "Error: gender cannot be determined from counts file, it must be specified as a parameter\n" if ( $options->{'counts_input'} == 1);
+
   my $gender_loci;
   if(defined $options->{'locus'}) {
     $gender_loci = $options->{'locus'};

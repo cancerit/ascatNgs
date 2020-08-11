@@ -116,8 +116,8 @@ sub setup {
               'f|force' => \$opts{'force'},
               'nc|noclean' => \$opts{'noclean'},
               'nb|nobigwig' => \$opts{'nobigwig'},
-              'tn|t_name' => \$opts{'t_name'},
-              'nn|n_name' => \$opts{'n_name'}
+              'tn|t_name=s' => \$opts{'t_name'},
+              'nn|n_name=s' => \$opts{'n_name'}
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});

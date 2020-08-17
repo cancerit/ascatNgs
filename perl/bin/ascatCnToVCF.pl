@@ -37,7 +37,7 @@ use Pod::Usage qw(pod2usage);
 use Bio::DB::HTS;
 use Try::Tiny;
 use PCAP::Cli;
-
+use Carp;
 
 use Sanger::CGP::Vcf;
 use Sanger::CGP::Vcf::VCFCNConverter;
@@ -50,19 +50,65 @@ use Sanger::CGP::Vcf::VcfProcessLog;
 
 {
   my $opts = setup();
+  
+  my $contigs;
+  my $mt_samples;
+  my $wt_samples;
 
-  my $mt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbm'}, -fasta => $opts->{'r'});
-  my $wt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbw'}, -fasta => $opts->{'r'});
+  #If tumour and sample name are provided dont require BAM or ref files
+  #and must build sample and ref object here
+  if ( defined $opts->{'tn'} and defined $opts->{'nn'} ) { 
+    $mt_samples->{ $opts->{'tn'} } = new Sanger::CGP::Vcf::Sample(
+        -name => $opts->{'tn'} ,
+        -study => undef,
+        -platform => $opts->{'msq'},
+        -seq_protocol => undef,
+        -accession => undef,
+        -accession_source => undef,
+        -description => undef
+      );
+    $wt_samples->{ $opts->{'nn'} } = new Sanger::CGP::Vcf::Sample(
+        -name => $opts->{'nn'} ,
+        -study => undef,
+        -platform => $opts->{'wsq'},
+        -seq_protocol => undef,
+        -accession => undef,
+        -accession_source => undef,
+        -description => undef
+      );
 
-  #parse samples and contigs from the bam files.
-  my $contigs = Sanger::CGP::Vcf::BamUtil->parse_contigs($mt_sam->header->text.$wt_sam->header->text,$opts->{'rs'},$opts->{'ra'});
-  my $mt_samples = Sanger::CGP::Vcf::BamUtil->parse_samples($mt_sam->header->text,$opts->{'mss'},$opts->{'msq'},$opts->{'msa'},$opts->{'msc'},$opts->{'msd'},$opts->{'msp'});
-  my $wt_samples = Sanger::CGP::Vcf::BamUtil->parse_samples($wt_sam->header->text,$opts->{'wss'},$opts->{'wsq'},$opts->{'wsa'},$opts->{'wsc'},$opts->{'wsd'},$opts->{'wsp'});
+    my $fai = $opts->{'r'}.'.fai';
+    open(my $FAI, $fai ) or die("\nERROR: Couldn't open $fai index file\n");
+    while(<$FAI>){
+      my ($name,$length) = split /\t/;
+      my $contig = new Sanger::CGP::Vcf::Contig(
+        -name => $name,
+        -length => $length,
+        -assembly => $opts->{'ra'},
+        -species => $opts->{'rs'}
+      );
+      if(exists $contigs->{$name}){
+      	croak "ERROR: Trying to merge contigs with conflicting data:\n".Dumper($contigs->{$name})."\n".Dumper($contig)
+          unless $contig->compare($contigs->{$name});
+      } else {
+      	$contigs->{$name} = $contig;
+      }
+    }
+  }
+  #BAM input
+  else {
+    my $mt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbm'}, -fasta => $opts->{'r'});
+    my $wt_sam = Bio::DB::HTS->new(-bam => $opts->{'sbw'}, -fasta => $opts->{'r'});
 
-  # close files we're finished with
-  undef $mt_sam;
-  undef $wt_sam;
+    #parse samples and contigs from the bam files.
+    $contigs = Sanger::CGP::Vcf::BamUtil->parse_contigs($mt_sam->header->text.$wt_sam->header->text,$opts->{'rs'},$opts->{'ra'});
+    $mt_samples = Sanger::CGP::Vcf::BamUtil->parse_samples($mt_sam->header->text,$opts->{'mss'},$opts->{'msq'},$opts->{'msa'},$opts->{'msc'},$opts->{'msd'},$opts->{'msp'});
+    $wt_samples = Sanger::CGP::Vcf::BamUtil->parse_samples($wt_sam->header->text,$opts->{'wss'},$opts->{'wsq'},$opts->{'wsa'},$opts->{'wsc'},$opts->{'wsd'},$opts->{'wsp'});
 
+    # close files we're finished with
+    undef $mt_sam;
+    undef $wt_sam;
+  }
   die "No samples found in normal bam file." if(scalar values %$wt_samples == 0);
   die "Multiple samples found in normal bam file." if(scalar values %$wt_samples > 1);
   die "No samples found in mutant bam file." if(scalar values %$mt_samples == 0);
@@ -164,6 +210,8 @@ sub setup{
           'rs|reference-species=s' => \$opts{'rs'},
           'ra|reference-assembly=s' => \$opts{'ra'},
           'r|reference=s' => \$opts{'r'},
+          'tn|tumour_name=s' => \$opts{'tn'},
+          'nn|normal_name=s' => \$opts{'nn'},
           '<>' => sub{push(@random_args,shift(@_));}
   ) or pod2usage(2);
 
@@ -175,17 +223,26 @@ sub setup{
   pod2usage(-verbose => 1) if(defined $opts{'h'});
   pod2usage(-verbose => 2) if(defined $opts{'m'});
 
-
   if($opts{'i'}){
     # can come from STDIN if not defined
     PCAP::Cli::file_for_reading('i', $opts{'i'});
   }
-  PCAP::Cli::file_for_reading('sbm', $opts{'sbm'});
-  PCAP::Cli::file_for_reading('sbw', $opts{'sbw'});
-  PCAP::Cli::file_for_reading('r', $opts{'r'});
 
   pod2usage(-message  => "\nERROR: msq|sample-sequencing-protocol-mut must be defined.\n", -verbose => 1,  -output => \*STDERR) if(exists $opts{'msq'} && ! defined $opts{'msq'});
   pod2usage(-message  => "\nERROR: wsq|sample-sequencing-protocol-norm must be defined.\n", -verbose => 1,  -output => \*STDERR) if(exists $opts{'wsq'} && ! defined $opts{'wsq'});
+
+  PCAP::Cli::file_for_reading('r', $opts{'r'});
+
+  if ( defined $opts{'tn'} or defined $opts{'nn'} ){
+    pod2usage(-message  => "\nERROR: When using sample name arguments both tumour and normal must be defined\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'tn'} && defined $opts{'nn'}) );
+    pod2usage(-message  => "\nERROR: When using sample name arguments ref. assembly must be specified (-ra)\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'ra'} && defined $opts{'ra'}) );
+    pod2usage(-message  => "\nERROR: When using sample name arguments ref. species must be specified (-rs)\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'rs'} && defined $opts{'rs'}) );
+    pod2usage(-message  => "\nERROR: When using sample name arguments sequencing platform must be specified (-wsp & -msp)\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'wsp'} && defined $opts{'wsp'})  and !( defined $opts{'msp'} && defined $opts{'msp'}) );
+    return \%opts;
+  } 
+
+  PCAP::Cli::file_for_reading('sbm', $opts{'sbm'});
+  PCAP::Cli::file_for_reading('sbw', $opts{'sbw'});
 
   return \%opts;
 }
@@ -222,7 +279,11 @@ ascatCnToVCF.pl [options]
       -sample-accession-source-norm    -wsc  Normal sample accession source.
       -seq-platform-norm               -wsp  Normal sequencing platform [BAM HEADER].
 
+ 
     Other:
+     -tumour_name    -tn  Tumour sample name. For processing count file results
+     -normal_name    -nn  Normal sample name. For processing count file results
+
      -help     -h   Brief help message.
      -man      -m   Full documentation.
      -version  -v   Version information.

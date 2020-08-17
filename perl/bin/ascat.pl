@@ -153,12 +153,18 @@ sub setup {
 
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
+
+  #special case of couts file as input
   $opts{'counts_input'} = 0;
   if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
     warn qq{NOTE: using counts inputs, skipping allelecount step\n};
     if ( ( !defined($opts{'t_name'} )) || ( ! defined($opts{'n_name'})) ){
-      pod2usage(-msg  => "\nERROR: Must specify normal & tumour names when using count files as input\n", -verbose => 1,  -output => \*STDERR);  
+      pod2usage(-msg  => "\nERROR: Must specify normal & tumour names when using count files as input\n", -verbose => 1,  -output => \*STDERR);
     }
+    pod2usage(-msg  => "\nERROR: Must specify assembly (-ra ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'assembly'} ) );
+    pod2usage(-msg  => "\nERROR: Must specify species (-rs ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'species'} ) );
+    pod2usage(-msg  => "\nERROR: Must specigy platform (-pl ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'platform'} ) );
+    pod2usage(-msg  => "\nERROR: Must specify genderChr when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'genderChr'} ) );
     $opts{'counts_input'} = 1;
   }
   if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'normal'} =~ /\.count\.gz$/ ) ) {

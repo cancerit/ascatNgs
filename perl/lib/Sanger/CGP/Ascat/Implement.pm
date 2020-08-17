@@ -295,8 +295,14 @@ sub finalise {
   $command .= " -o $new_vcf";
   $command .= " -r $options->{reference}";
   $command .= " -i $cave_cn";
-  $command .= " -sbm $options->{tumour}";
-  $command .= " -sbw $options->{normal}";
+  if ( $options->{'counts_input'} == 0) {
+    $command .= " -sbm $options->{tumour}";
+    $command .= " -sbw $options->{normal}";
+  }
+  else {
+    $command .= " -tn $options->{tumour_name}";
+    $command .= " -nn $options->{normal_name}";
+  }
   $command .= " -ra $options->{assembly}" if(defined $options->{'assembly'});
   $command .= " -rs $options->{species}" if(defined $options->{'species'});
   $command .= " -msq $options->{protocol} -wsq $options->{protocol}" if(defined $options->{'protocol'});

@@ -24,6 +24,7 @@
 BEGIN {
   use Cwd qw(abs_path);
   use File::Basename;
+  use File::Path qw(make_path);
   unshift (@INC,dirname(abs_path($0)).'/../lib');
 };
 
@@ -56,14 +57,19 @@ const my @VALID_GENDERS => qw(XX XY L);
 
   # register any process that can run in parallel here
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);
+  $threads->add_function('deploy_counts', \&Sanger::CGP::Ascat::Implement::deploy_counts);
 
   # start processes here (in correct order obviously), add conditions for skipping based on 'process' option
-  if(!exists $options->{'process'} || $options->{'process'} eq 'allele_count') {
+  if( ($options->{'counts_input'} == 0) && (!exists $options->{'process'} || $options->{'process'} eq 'allele_count')) {
     my $jobs = $options->{'lociChrsBySample'};
     $jobs = $options->{'limit'} if(exists $options->{'limit'} && defined $options->{'limit'});
     $threads->run($jobs, 'allele_count', $options);
   }
-
+  if ( $options->{'counts_input'} == 1) {
+    my $ascat_out = File::Spec->catdir(abs_path($options->{'tmp'}),'ascat');
+    make_path($ascat_out) unless(-e $ascat_out);
+    $threads->run(2, 'deploy_counts', $options);    
+  }
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {
     Sanger::CGP::Ascat::Implement::finalise($options);
@@ -110,6 +116,8 @@ sub setup {
               'f|force' => \$opts{'force'},
               'nc|noclean' => \$opts{'noclean'},
               'nb|nobigwig' => \$opts{'nobigwig'},
+              'tn|t_name=s' => \$opts{'t_name'},
+              'nn|n_name=s' => \$opts{'n_name'}
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
@@ -145,6 +153,23 @@ sub setup {
 
   PCAP::Cli::file_for_reading('tumour', $opts{'tumour'});
   PCAP::Cli::file_for_reading('normal', $opts{'normal'});
+
+  #special case of couts file as input
+  $opts{'counts_input'} = 0;
+  if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
+    warn qq{NOTE: using counts inputs, skipping allelecount step\n};
+    if ( ( !defined($opts{'t_name'} )) || ( ! defined($opts{'n_name'})) ){
+      pod2usage(-msg  => "\nERROR: Must specify normal & tumour names when using count files as input\n", -verbose => 1,  -output => \*STDERR);
+    }
+    pod2usage(-msg  => "\nERROR: Must specify assembly (-ra ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'assembly'} ) );
+    pod2usage(-msg  => "\nERROR: Must specify species (-rs ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'species'} ) );
+    pod2usage(-msg  => "\nERROR: Must specigy platform (-pl ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'platform'} ) );
+    pod2usage(-msg  => "\nERROR: Must specify genderChr when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'genderChr'} ) );
+    $opts{'counts_input'} = 1;
+  }
+  if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
+    pod2usage(-msg  => "\nERROR: Both tumour and normal need to be count files.\n", -verbose => 1,  -output => \*STDERR);
+  }
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
   PCAP::Cli::file_for_reading('reference', $opts{'reference'});
   PCAP::Cli::out_dir_check('outdir', $opts{'outdir'});
@@ -244,8 +269,8 @@ ascat.pl [options]
   Required parameters
 
     -outdir       -o    Folder to output result to.
-    -tumour       -t    Tumour BAM/CRAM file
-    -normal       -n    Normal BAM/CRAM file
+    -tumour       -t    Tumour BAM/CRAM/counts file
+    -normal       -n    Normal BAM/CRAM/counts file
     -reference    -r    Reference fasta
     -snp_gc       -sg   Snp GC correction file
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
@@ -279,6 +304,8 @@ ascat.pl [options]
     -noclean      -nc   Finalise results but don't clean up the tmp directory.
                         - Useful when including a manual check and restarting ascat with new pu and pi params.
     -nobigwig     -nb   Don't generate BigWig files.
+    -t_name       -tn   Tumour name to use when using count files as input
+    -n_name       -nn   Noraml name to use when using count files as input
 
   Other
     -help         -h    Brief help message

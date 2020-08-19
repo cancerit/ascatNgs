@@ -34,6 +34,7 @@ WriteMakefile(
                         bin/ascatCnToVCF.pl
                         bin/ascatFailedCnCsv.pl
                         bin/ascatToBigWig.pl
+                        bin/ascatCounts.pl
                         bin/utilities/ascatFaiChunk.pl
                         bin/utilities/ascatSnpPanelFromVcfs.pl
                         bin/utilities/ascatSnpPanelGcCorrections.pl

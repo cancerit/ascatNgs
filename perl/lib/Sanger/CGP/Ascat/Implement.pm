@@ -106,7 +106,7 @@ sub allele_count {
     make_path($loci_files) unless(-e $loci_files);
 
     my $chr = $seqs[$seq_idx-1];
-    my $sname = sanitised_sample_from_bam($options->{$samp_type});
+    my $sname = $options->{$samp_type.'_name'};
     my $alleleCountOut = File::Spec->catfile($ac_out,sprintf '%s.%s.allct', $sname, $chr);
 
     # first we need a loci file, generate from the gc file:
@@ -133,8 +133,8 @@ sub ascat {
   $tmp = abs_path($tmp);
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
-  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
-  my $norm_name = sanitised_sample_from_bam($options->{'normal'});
+  my $tum_name = $options->{'tumour_name'};
+  my $norm_name = $options->{'normal_name'};
 
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   make_path($ascat_out) unless(-e $ascat_out);
@@ -147,14 +147,15 @@ sub ascat {
   my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
   my $normcount = File::Spec->catfile($ascat_out,$normcountfile);
 
-  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
-    merge_counts($options, $tmp, $tum_name, $tumcount);
-    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
-  }
-
-  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0)) {
-    merge_counts($options, $tmp, $norm_name, $normcount);
-    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
+  if ( $options->{'counts_input'} == 0 ) {
+    unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
+      merge_counts($options, $tmp, $tum_name, $tumcount);
+      PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
+    }
+    unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0)) {
+      merge_counts($options, $tmp, $norm_name, $normcount);
+      PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_wt', 0);
+    }
   }
 
   my $clean_snp_gc = File::Spec->catfile($tmp,'SnpGcCorrections.tsv');
@@ -210,7 +211,7 @@ sub finalise {
 
   return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
 
-  my $tum_name = sanitised_sample_from_bam($options->{'tumour'});
+  my $tum_name = $options->{'tumour_name'};
   my $ascat_out = File::Spec->catdir($tmp, 'ascat');
   my $cave_cn;
   my $force_complete = 0;
@@ -294,8 +295,14 @@ sub finalise {
   $command .= " -o $new_vcf";
   $command .= " -r $options->{reference}";
   $command .= " -i $cave_cn";
-  $command .= " -sbm $options->{tumour}";
-  $command .= " -sbw $options->{normal}";
+  if ( $options->{'counts_input'} == 0) {
+    $command .= " -sbm $options->{tumour}";
+    $command .= " -sbw $options->{normal}";
+  }
+  else {
+    $command .= " -tn $options->{tumour_name}";
+    $command .= " -nn $options->{normal_name}";
+  }
   $command .= " -ra $options->{assembly}" if(defined $options->{'assembly'});
   $command .= " -rs $options->{species}" if(defined $options->{'species'});
   $command .= " -msq $options->{protocol} -wsq $options->{protocol}" if(defined $options->{'protocol'});
@@ -371,6 +378,36 @@ sub merge_counts {
   return 1;
 }
 
+sub merge_counts_and_index {
+  my $options = shift;
+
+  my $tmp = $options->{'tmp'};
+  $tmp = abs_path($tmp);
+  return 1 if PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 0);
+
+  my $tum_name = $options->{'tumour_name'};
+
+  my $ascat_out = File::Spec->catdir($tmp, 'ascatCounts');
+  make_path($ascat_out) unless(-e $ascat_out);
+
+  my $tumcountfile = $tum_name . '.count';
+
+  my $tumcount = File::Spec->catfile($ascat_out,$tumcountfile);
+
+  unless(PCAP::Threaded::success_exists(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0)) {
+    merge_counts($options, $tmp, $tum_name, $tumcount);
+    PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
+  }
+  my @commands = ();
+  my $tumcount_new = $tumcount.'.gz';
+  my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $tumcount, $tumcount, _which('bgzip'), $tumcount_new;
+  push @commands, $sort_gz;
+  my $tabix = sprintf('%s -s1 -b2 -e2  %s',_which('tabix'),$tumcount_new);
+  push @commands, $tabix;
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
+  unlink $tumcount;
+}
+
 sub get_allele_count_file_path {
   my ($tmp,$sample_name) = @_;
   return File::Spec->catfile(File::Spec->catdir($tmp, $sample_name),'sample.allele_count');
@@ -384,8 +421,14 @@ sub sanitised_sample_from_bam {
 
 sub prepare {
   my $options = shift;
-  $options->{'tumour_name'} = (PCAP::Bam::sample_name($options->{'tumour'}))[0];
-  $options->{'normal_name'} = (PCAP::Bam::sample_name($options->{'normal'}))[0];
+  if ( $options->{'counts_input'} == 0 ) {
+    $options->{'tumour_name'} = sanitised_sample_from_bam($options->{'tumour'});
+    $options->{'normal_name'} = sanitised_sample_from_bam($options->{'normal'});
+  }
+  else {
+    $options->{'tumour_name'} = $options->{'t_name'};
+    $options->{'normal_name'} = $options->{'n_name'};
+  }
   return 1;
 }
 
@@ -400,6 +443,9 @@ sub _which {
 
 sub determine_gender {
   my $options = shift;
+
+  die "Error: gender cannot be determined from counts file, it must be specified as a parameter\n" if ( $options->{'counts_input'} == 1);
+
   my $gender_loci;
   if(defined $options->{'locus'}) {
     $gender_loci = $options->{'locus'};
@@ -467,6 +513,24 @@ sub limited_indices {
 	  push @indicies, $index_in;
 	}
 	return @indicies;
+}
+
+sub deploy_counts {
+  my ($index_in, $options) = @_;
+  my $tmp = abs_path($options->{'tmp'});
+  my $ascat_out = File::Spec->catdir($tmp,'ascat');
+  my @commands;
+  my $tum_name = $options->{'tumour_name'};
+  my $norm_name = $options->{'normal_name'};
+  my $tumcount = File::Spec->catfile($ascat_out,$tum_name . '.count');
+  my $normcount = File::Spec->catfile($ascat_out,$norm_name . '.count');
+  if ($index_in == 1 ){
+    push @commands, sprintf 'zcat %s > %s',$options->{'tumour'}, $tumcount;
+  }
+  if ($index_in == 2 ){
+    push @commands, sprintf 'zcat %s > %s',$options->{'normal'}, $normcount;
+  }
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0); 
 }
 
 1;

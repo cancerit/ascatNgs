@@ -1,5 +1,10 @@
 # Changes
 
+## 4.4.0
+
+* Added ascatCounts to produce counts files
+* Modified ascat wrapper to handle count files as input
+
 ## 4.3.4
 
 * Eliminated redundant logic from setup script

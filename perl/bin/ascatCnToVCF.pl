@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014-2019 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
 # Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
@@ -50,14 +50,14 @@ use Sanger::CGP::Vcf::VcfProcessLog;
 
 {
   my $opts = setup();
-  
+
   my $contigs;
   my $mt_samples;
   my $wt_samples;
 
   #If tumour and sample name are provided dont require BAM or ref files
   #and must build sample and ref object here
-  if ( defined $opts->{'tn'} and defined $opts->{'nn'} ) { 
+  if ( defined $opts->{'tn'} and defined $opts->{'nn'} ) {
     $mt_samples->{ $opts->{'tn'} } = new Sanger::CGP::Vcf::Sample(
         -name => $opts->{'tn'} ,
         -study => undef,
@@ -239,7 +239,7 @@ sub setup{
     pod2usage(-message  => "\nERROR: When using sample name arguments ref. species must be specified (-rs)\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'rs'} && defined $opts{'rs'}) );
     pod2usage(-message  => "\nERROR: When using sample name arguments sequencing platform must be specified (-wsp & -msp)\n", -verbose => 1,  -output => \*STDERR) if( !( defined $opts{'wsp'} && defined $opts{'wsp'})  and !( defined $opts{'msp'} && defined $opts{'msp'}) );
     return \%opts;
-  } 
+  }
 
   PCAP::Cli::file_for_reading('sbm', $opts{'sbm'});
   PCAP::Cli::file_for_reading('sbw', $opts{'sbw'});
@@ -279,7 +279,7 @@ ascatCnToVCF.pl [options]
       -sample-accession-source-norm    -wsc  Normal sample accession source.
       -seq-platform-norm               -wsp  Normal sequencing platform [BAM HEADER].
 
- 
+
     Other:
      -tumour_name    -tn  Tumour sample name. For processing count file results
      -normal_name    -nn  Normal sample name. For processing count file results

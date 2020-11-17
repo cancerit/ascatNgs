@@ -49,48 +49,6 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
 set -u
 
-# ## INSTALL CPANMINUS
-# set -eux
-# curl -sSL https://cpanmin.us/ > $SETUP_DIR/cpanm
-# perl $SETUP_DIR/cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH App::cpanminus
-# rm -f $SETUP_DIR/cpanm
-
-# ## HTSLIB (tar.bz2)
-# if [ ! -e $SETUP_DIR/htslib.success ]; then
-#   rm -rf htslib
-#   mkdir -p htslib
-#   curl -sSL --retry 10 https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2 > distro.tar.bz2
-#   tar --strip-components 1 -C htslib -jxf distro.tar.bz2
-#   cd htslib
-#   ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
-#   make clean
-#   make -j$CPU
-#   make install
-#   cd $SETUP_DIR
-#   rm -rf distro.*
-#   touch $SETUP_DIR/htslib.success
-# fi
-
-# ## Bio::DB::HTS (tar.gz)
-# if [ ! -e $SETUP_DIR/Bio-DB-HTS.success ]; then
-#   ## add perl deps
-#   cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH Module::Build
-#   cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH XML::Parser
-#   cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH Bio::Root::Version
-
-#   curl -sSL --retry 10 https://github.com/Ensembl/Bio-DB-HTS/archive/${VER_BIODBHTS}.tar.gz > distro.tar.gz
-#   rm -rf distro/*
-#   tar --strip-components 1 -C distro -zxf distro.tar.gz
-#   cd distro
-#   perl Build.PL --install_base=$INST_PATH --htslib=$INST_PATH
-#   ./Build
-#   ./Build test
-#   ./Build install
-#   cd $SETUP_DIR
-#   rm -rf distro.* distro/*
-#   touch $SETUP_DIR/Bio-DB-HTS.success
-# fi
-
 ## vcftools
 if [ ! -e $SETUP_DIR/vcftools.success ]; then
   curl -sSL --retry 10 https://github.com/vcftools/vcftools/releases/download/v${VER_VCFTOOLS}/vcftools-${VER_VCFTOOLS}.tar.gz > distro.tar.gz
@@ -126,7 +84,8 @@ if [ ! -e $SETUP_DIR/alleleCount.success ]; then
   cd distro
   if [ ! -e $SETUP_DIR/alleleCount_c.success ]; then
     make -C c clean
-    make -C c -j$CPU prefix=$INST_PATH HTSLIB=$INST_PATH/lib
+    export prefix=$INST_PATH
+    make -C c -j$CPU
     cp c/bin/alleleCounter $INST_PATH/bin/.
     touch $SETUP_DIR/alleleCount_c.success
   fi

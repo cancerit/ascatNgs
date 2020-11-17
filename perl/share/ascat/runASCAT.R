@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014-2019 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
 # Author: Peter Van Loo <cgphelp@sanger.ac.uk>
 #

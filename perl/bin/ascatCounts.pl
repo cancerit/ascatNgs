@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014-2019 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
 # Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
@@ -50,7 +50,7 @@ use PCAP::Cli;
   $options->{'tumour'} = $options->{'bam'}; #map input file to tumour
   $options->{'tumour_name'} = (PCAP::Bam::sample_name($options->{'bam'}))[0];
   my $threads = PCAP::Threaded->new($options->{'threads'});
-  
+
   # register any process that can run in parallel here
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);
 
@@ -149,7 +149,7 @@ sub setup {
   make_path($logs) unless(-d $logs);
 
   $opts{'tmp'} = $tmpdir;
-  
+
   return \%opts;
 }
 

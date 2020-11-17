@@ -1,5 +1,9 @@
 # Changes
 
+## 4.4.1
+
+* Update base image for performance from htslib 1.11.
+
 ## 4.4.0
 
 * Added ascatCounts to produce counts files

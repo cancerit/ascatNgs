@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014-2019 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
 # Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
@@ -68,7 +68,7 @@ const my @VALID_GENDERS => qw(XX XY L);
   if ( $options->{'counts_input'} == 1) {
     my $ascat_out = File::Spec->catdir(abs_path($options->{'tmp'}),'ascat');
     make_path($ascat_out) unless(-e $ascat_out);
-    $threads->run(2, 'deploy_counts', $options);    
+    $threads->run(2, 'deploy_counts', $options);
   }
   Sanger::CGP::Ascat::Implement::ascat($options) if(!exists $options->{'process'} || $options->{'process'} eq 'ascat');
   if(!exists $options->{'process'} || $options->{'process'} eq 'finalise') {

@@ -1,11 +1,11 @@
-FROM quay.io/wtsicgp/pcap-core:5.2.1 as builder
+FROM quay.io/wtsicgp/pcap-core:5.4.2 as builder
 
 USER root
 
 # ALL tool versions used by opt-build.sh
 ENV VER_CGPVCF="v2.2.1"
 ENV VER_VCFTOOLS="0.1.16"
-ENV VER_ALLELECOUNT="4.1.0"
+ENV VER_ALLELECOUNT="v4.2.1"
 
 RUN apt-get -yq update
 
@@ -15,7 +15,7 @@ RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`-cran40/
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN apt-get -yq update
 
-ENV DEBIAN_FRONTEND "noninteractive" 
+ENV DEBIAN_FRONTEND "noninteractive"
 # no benefit of combined in builder stage
 RUN apt-get install -yq --no-install-recommends locales
 RUN apt-get install -yq --no-install-recommends g++
@@ -80,14 +80,13 @@ FROM ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
-      version="4.3.4" \
       description="Ascat NGS docker"
 
 RUN apt-get -yq update \
 && apt-get install -qy --no-install-recommends lsb-release \
 gnupg
 
-ENV DEBIAN_FRONTEND "noninteractive" 
+ENV DEBIAN_FRONTEND "noninteractive"
 RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`-cran40/" >> /etc/apt/sources.list \
 && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
 && apt-get -yq update \

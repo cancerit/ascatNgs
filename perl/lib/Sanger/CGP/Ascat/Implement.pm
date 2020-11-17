@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014-2019 Genome Research Ltd.
+# Copyright (c) 2014-2020 Genome Research Ltd.
 #
 # Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
@@ -530,7 +530,7 @@ sub deploy_counts {
   if ($index_in == 2 ){
     push @commands, sprintf 'zcat %s > %s',$options->{'normal'}, $normcount;
   }
-  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0); 
+  PCAP::Threaded::external_process_handler(File::Spec->catdir($tmp, 'logs'), \@commands, 0);
 }
 
 1;

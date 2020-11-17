@@ -36,7 +36,7 @@
 # need to keep in sync with Dockerfile
 export VER_CGPVCF="v2.2.1"
 export VER_VCFTOOLS="0.1.16"
-export VER_ALLELECOUNT="4.1.0"
+export VER_ALLELECOUNT="v4.2.1"
 
 get_file () {
 # output, source

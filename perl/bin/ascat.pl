@@ -232,17 +232,29 @@ sub setup {
   $opts{'tmp'} = $tmpdir;
 
   if(defined $opts{'gender'}){
-    pod2usage(-message => "\nERROR: Unknown gender value: $opts{gender}\n", -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
-    if($opts{'gender'} eq 'L') {
-      my ($is_male, $gender_chr) = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
-      $opts{'genderChr'} = $gender_chr;
-      $opts{'genderIsMale'} = $is_male;
-      $opts{'gender'} = $is_male eq 'N' ? 'XX' : 'XY';
+    if(-e $opts{'gender'}) {
+      # read the ascatCounts.pl is_male file
+      my %key_map = ('SexChr' => 'genderChr', 'SexChrFound' => 'genderIsMale', 'SexForAscat' => 'gender');
+      open my $ifh, '<', $opts{'gender'};
+      while(my $l = <$ifh>) {
+        chomp $l;
+        my ($k, $v) = split "\t", $l;
+        $opts{ $key_map{$k} } = $v;
+      }
     }
     else {
-      pod2usage(-message => "\nERROR: genderChr must be set when gender is XX/XY\n", -verbose => 1) if(!defined $opts{'genderChr'});
-      pod2usage(-message => "\nERROR: gender must be XX, XY or L\n", -verbose => 1)if($opts{'gender'} !~ m/^X[XY]$/);
-      $opts{'genderIsMale'} = $opts{'gender'} eq 'XX' ? 'N' : 'Y';
+      pod2usage(-message => "\nERROR: Unknown gender value: $opts{gender}\n", -verbose => 1) unless(first {$_ eq $opts{'gender'}} @VALID_GENDERS);
+      if($opts{'gender'} eq 'L') {
+        my ($is_male, $gender_chr) = Sanger::CGP::Ascat::Implement::determine_gender(\%opts);
+        $opts{'genderChr'} = $gender_chr;
+        $opts{'genderIsMale'} = $is_male;
+        $opts{'gender'} = $is_male eq 'N' ? 'XX' : 'XY';
+      }
+      else {
+        pod2usage(-message => "\nERROR: genderChr must be set when gender is XX/XY\n", -verbose => 1) if(!defined $opts{'genderChr'});
+        pod2usage(-message => "\nERROR: gender must be XX, XY or L\n", -verbose => 1)if($opts{'gender'} !~ m/^X[XY]$/);
+        $opts{'genderIsMale'} = $opts{'gender'} eq 'XX' ? 'N' : 'Y';
+      }
     }
   } else {
     pod2usage(-message => "\nERROR: gender not set\n", -verbose => 1);
@@ -274,9 +286,10 @@ ascat.pl [options]
     -reference    -r    Reference fasta
     -snp_gc       -sg   Snp GC correction file
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)
-    -gender       -g    Sample gender (XX, XY, L)
+    -gender       -g    Sample gender (XX, XY, L, FILE)
                           For XX/XY see '-gc'
                           When 'L' see '-l'
+                          FILE - matched normal is_male.txt from ascatCounts.pl
 
   Targeted processing (further detail under OPTIONS):
     -process      -p    Only process this step then exit, optionally set -index
@@ -293,7 +306,7 @@ ascat.pl [options]
     -cpus         -c    Number of cores to use. [1]
                         - recommend max 2 during 'input' process.
     -locus        -l    Using a list of loci, default when '-L' [share/gender/GRCh37d5_Y.loci]
-                        - these are loci that will not present at all in a female sample
+                        - these are loci that will not be present at all in a female sample
     -force        -f    Force completion - solution not possible
                         - adding this will result in successful completion of analysis even
                           when ASCAT can't generate a solution.  A default copynumber of 5/2

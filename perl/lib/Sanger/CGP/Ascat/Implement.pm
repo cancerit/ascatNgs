@@ -399,7 +399,7 @@ sub merge_counts_and_index {
     PCAP::Threaded::touch_success(File::Spec->catdir($tmp, 'progress'), 'merge_counts_mt', 0);
   }
   my @commands = ();
-  my $tumcount_new = $tumcount.'.gz';
+  my $tumcount_new = File::Spec->catfile($options->{outdir}, $tumcountfile.'.gz');
   my $sort_gz = sprintf q{(grep '^#' %s ; grep -v '^#' %s | sort -k 1,1 -k 2,2n) | %s -c > %s}, $tumcount, $tumcount, _which('bgzip'), $tumcount_new;
   push @commands, $sort_gz;
   my $tabix = sprintf('%s -s1 -b2 -e2  %s',_which('tabix'),$tumcount_new);
@@ -462,8 +462,20 @@ sub determine_gender {
   $idx = $options->{'index'} if(exists $options->{'index'} && defined $options->{'index'});
   my $outfile = File::Spec->catfile($options->{'tmp'}, $idx.'.normal_gender.tsv');
 
+  my $read_file;
+  if(exists $options->{normal}) {
+    $read_file = $options->{normal};
+  }
+  elsif(exists $options->{bam}) {
+    # if asactCounts.pl
+    $read_file = $options->{bam};
+  }
+  else {
+    die "No approiate input file for determine_gender.";
+  }
+
   my $command = _which('alleleCounter.pl');
-  $command .= sprintf $ALLELE_COUNT_GENDER, $outfile, $options->{'normal'}, $gender_loci, $options->{'reference'};
+  $command .= sprintf $ALLELE_COUNT_GENDER, $outfile, $read_file, $gender_loci, $options->{'reference'};
   $command .= '-m '.$options->{'minbasequal'} if exists $options->{'minbasequal'};
   system($command);
   open my $GEND_IN, '<', $outfile;

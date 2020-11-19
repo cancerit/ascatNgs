@@ -444,7 +444,18 @@ sub _which {
 sub determine_gender {
   my $options = shift;
 
-  die "Error: gender cannot be determined from counts file, it must be specified as a parameter\n" if ( $options->{'counts_input'} == 1);
+  my $read_file;
+  if(exists $options->{normal}) {
+    die "Error: gender cannot be determined from counts file, it must be specified as a parameter\n" if ( $options->{'counts_input'} == 1);
+    $read_file = $options->{normal};
+  }
+  elsif(exists $options->{bam}) {
+    # if asactCounts.pl
+    $read_file = $options->{bam};
+  }
+  else {
+    die "No approiate input file for determine_gender.";
+  }
 
   my $gender_loci;
   if(defined $options->{'locus'}) {
@@ -461,18 +472,6 @@ sub determine_gender {
   my $idx = 0;
   $idx = $options->{'index'} if(exists $options->{'index'} && defined $options->{'index'});
   my $outfile = File::Spec->catfile($options->{'tmp'}, $idx.'.normal_gender.tsv');
-
-  my $read_file;
-  if(exists $options->{normal}) {
-    $read_file = $options->{normal};
-  }
-  elsif(exists $options->{bam}) {
-    # if asactCounts.pl
-    $read_file = $options->{bam};
-  }
-  else {
-    die "No approiate input file for determine_gender.";
-  }
 
   my $command = _which('alleleCounter.pl');
   $command .= sprintf $ALLELE_COUNT_GENDER, $outfile, $read_file, $gender_loci, $options->{'reference'};

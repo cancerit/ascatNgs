@@ -164,7 +164,9 @@ sub setup {
     pod2usage(-msg  => "\nERROR: Must specify assembly (-ra ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'assembly'} ) );
     pod2usage(-msg  => "\nERROR: Must specify species (-rs ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'species'} ) );
     pod2usage(-msg  => "\nERROR: Must specigy platform (-pl ) when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'platform'} ) );
-    pod2usage(-msg  => "\nERROR: Must specify genderChr when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'genderChr'} ) );
+    unless(-e $opts{'gender'}) {
+      pod2usage(-msg  => "\nERROR: Must specify genderChr when using count files as input\n", -verbose => 1,  -output => \*STDERR) unless ( defined( $opts{'genderChr'} ) );
+    }
     $opts{'counts_input'} = 1;
   }
   if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'normal'} =~ /\.count\.gz$/ ) ) {

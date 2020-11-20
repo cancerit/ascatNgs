@@ -156,7 +156,7 @@ sub setup {
 
   #special case of couts file as input
   $opts{'counts_input'} = 0;
-  if ( ( $opts{'tumour'} =~ /\.count\.gz$/ ) &&  ( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
+  if ( ( $opts{'tumour'} =~ /\.gz$/ ) &&  ( $opts{'normal'} =~ /\.gz$/ ) ) {
     warn qq{NOTE: using counts inputs, skipping allelecount step\n};
     if ( ( !defined($opts{'t_name'} )) || ( ! defined($opts{'n_name'})) ){
       pod2usage(-msg  => "\nERROR: Must specify normal & tumour names when using count files as input\n", -verbose => 1,  -output => \*STDERR);
@@ -169,7 +169,7 @@ sub setup {
     }
     $opts{'counts_input'} = 1;
   }
-  if ( !( $opts{'tumour'} =~ /\.count\.gz$/ ) !=  !( $opts{'normal'} =~ /\.count\.gz$/ ) ) {
+  if ( !( $opts{'tumour'} =~ /\.gz$/ ) !=  !( $opts{'normal'} =~ /\.gz$/ ) ) {
     pod2usage(-msg  => "\nERROR: Both tumour and normal need to be count files.\n", -verbose => 1,  -output => \*STDERR);
   }
   PCAP::Cli::file_for_reading('snp_gc', $opts{'snp_gc'});
@@ -283,8 +283,8 @@ ascat.pl [options]
   Required parameters
 
     -outdir       -o    Folder to output result to.
-    -tumour       -t    Tumour BAM/CRAM/counts file
-    -normal       -n    Normal BAM/CRAM/counts file
+    -tumour       -t    Tumour BAM/CRAM/counts file (counts must be .gz)
+    -normal       -n    Normal BAM/CRAM/counts file (counts must be .gz)
     -reference    -r    Reference fasta
     -snp_gc       -sg   Snp GC correction file
     -protocol     -pr   Sequencing protocol (e.g. WGS, WXS)

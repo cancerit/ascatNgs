@@ -54,19 +54,29 @@ use PCAP::Cli;
   # register any process that can run in parallel here
   $threads->add_function('allele_count', \&Sanger::CGP::Ascat::Implement::allele_count);
 
-  # start processes here (in correct order obviously), add conditions for skipping based on 'process' option
   my $jobs = $options->{'lociChrsBySample'};
-  $jobs = $options->{'limit'} if(exists $options->{'limit'} && defined $options->{'limit'});
   $threads->run($jobs, 'allele_count', $options);
 
   Sanger::CGP::Ascat::Implement::merge_counts_and_index($options);
+  write_sex_info($options);
   cleanup($options) unless($options->{'noclean'} == 1);
+}
+
+sub write_sex_info {
+  my $options = shift;
+  return unless(exists $options->{locus});
+  my ($is_male, $sex_chr) = Sanger::CGP::Ascat::Implement::determine_gender($options);
+  my $is_male_f = sprintf '%s/%s.%s', $options->{outdir}, $options->{tumour_name}, 'is_male.txt';
+  open my $mfh, '>', $is_male_f;
+  printf $mfh "SexChr\t%s\n", $sex_chr;
+  printf $mfh "SexChrFound\t%s\n", $is_male;
+  printf $mfh "SexForAscat\t%s\n", $is_male eq 'Y' ? 'XY' : 'XX';
+  close $mfh;
 }
 
 sub cleanup {
   my $options = shift;
   my $tmpdir = $options->{'tmp'};
-  move(File::Spec->catdir($tmpdir, 'ascatCounts'), File::Spec->catdir($options->{'outdir'}, 'ascatCounts')) || die $!;
   move(File::Spec->catdir($tmpdir, 'logs'), File::Spec->catdir($options->{'outdir'}, 'logs')) || die $!;
   remove_tree $tmpdir if(-e $tmpdir);
   return 0;
@@ -95,6 +105,7 @@ sub setup {
               'sg|snp_gc=s' => \$opts{'snp_gc'},
               'r|reference=s' => \$opts{'reference'},
               'nc|noclean' => \$opts{'noclean'},
+              'l|locus=s' => \$opts{'locus'},
   ) or pod2usage(2);
 
   pod2usage(-verbose => 1, -exitval => 0) if(defined $opts{'h'});
@@ -120,8 +131,16 @@ sub setup {
     pod2usage(-msg  => "\nERROR: Option '-$item' must be defined.\n", -verbose => 1,  -output => \*STDERR) unless(defined $opts{$item});
   }
 
-  for my $item(qw(bam reference outdir)) {
+  for my $item(qw(bam snp_gc reference outdir)) {
     $opts{$item} = File::Spec->rel2abs( $opts{$item} ) if(defined $opts{$item});
+  }
+
+  if(defined $opts{locus}) {
+    $opts{locus} = File::Spec->rel2abs( $opts{locus} );
+    PCAP::Cli::file_for_reading('locus', $opts{locus});
+  }
+  else {
+    delete $opts{locus};
   }
 
   PCAP::Cli::file_for_reading('bam', $opts{'bam'});
@@ -175,6 +194,8 @@ ascatCounts.pl [options]
     -snp_gc       -sg   Snp GC correction file
 
   Optional parameters
+    -locus        -l    Male sex chromosome loci [share/gender/GRCh37d5_Y.loci]
+                         - when provided generate SAMPLE.is_male.txt
     -minbasequal  -q    Minimum base quality required before allele is used. [20]
     -cpus         -c    Number of cores to use. [1]
     -noclean      -nc   Finalise results but don't clean up the tmp directory.

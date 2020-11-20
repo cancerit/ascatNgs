@@ -1,5 +1,10 @@
 # Changes
 
+## 4.5.0
+
+* Handle need for allele c to generate is_male data file
+* ascat.pl accepts abouve file as input for `-g`
+
 ## 4.4.1
 
 * Update base image for performance from htslib 1.11.

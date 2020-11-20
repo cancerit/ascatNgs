@@ -26,7 +26,7 @@ use strict;
 use Const::Fast qw(const);
 use base 'Exporter';
 
-our $VERSION = '4.4.1';
+our $VERSION = '4.5.0';
 our @EXPORT = qw($VERSION);
 
 const my $LICENSE =>
